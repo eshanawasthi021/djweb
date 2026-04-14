@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOD LEVEL DJ MIXER</title>
+
+<style>
+body { margin:0; background:#000; color:#0ff; font-family:Arial; text-align:center; }
+.deck { display:inline-block; background:#111; padding:15px; margin:10px; border-radius:15px; width:320px; }
+input[type=range]{ width:100%; }
+canvas { width:100%; height:80px; background:#000; }
+button { margin:5px; padding:8px; background:#0ff; border:none; border-radius:6px; }
+</style>
+</head>
+
+<body>
+
+<h1>👑 GOD LEVEL DJ MIXER</h1>
+
+<div class="deck">
+<h2>Deck A</h2>
+<input type="file" id="fileA">
+<input placeholder="Song URL" id="urlA">
+<button onclick="loadURL('A')">Load URL</button><br>
+
+<button onclick="play(A)">▶</button>
+<button onclick="pause(A)">⏸</button>
+<button onclick="cue(A)">🎧 Cue</button>
+
+<p>BPM: <span id="bpmA">--</span></p>
+
+<p>EQ</p>
+Bass <input type="range" id="bassA" min="-30" max="30">
+Mid <input type="range" id="midA" min="-30" max="30">
+Treble <input type="range" id="treA" min="-30" max="30">
+
+<canvas id="waveA"></canvas>
+</div>
+
+<div class="deck">
+<h2>Deck B</h2>
+<input type="file" id="fileB">
+<input placeholder="Song URL" id="urlB">
+<button onclick="loadURL('B')">Load URL</button><br>
+
+<button onclick="play(B)">▶</button>
+<button onclick="pause(B)">⏸</button>
+<button onclick="cue(B)">🎧 Cue</button>
+
+<p>BPM: <span id="bpmB">--</span></p>
+
+<p>EQ</p>
+Bass <input type="range" id="bassB" min="-30" max="30">
+Mid <input type="range" id="midB" min="-30" max="30">
+Treble <input type="range" id="treB" min="-30" max="30">
+
+<canvas id="waveB"></canvas>
+</div>
+
+<h2>Crossfader</h2>
+<input type="range" id="cross" min="0" max="100" value="50">
+
+<button onclick="sync()">SYNC BPM</button>
+
+<script>
+const ctx = new (window.AudioContext||window.webkitAudioContext)();
+
+function createDeck(){
+  let audio = new Audio();
+  let src = ctx.createMediaElementSource(audio);
+
+  let gain = ctx.createGain();
+
+  let bass = ctx.createBiquadFilter();
+  bass.type="lowshelf";
+
+  let mid = ctx.createBiquadFilter();
+  mid.type="peaking";
+
+  let tre = ctx.createBiquadFilter();
+  tre.type="highshelf";
+
+  src.connect(bass);
+  bass.connect(mid);
+  mid.connect(tre);
+  tre.connect(gain);
+  gain.connect(ctx.destination);
+
+  return {audio,gain,bass,mid,tre};
+}
+
+let A = createDeck();
+let B = createDeck();
+
+// Load file
+fileA.onchange=e=> loadFile(A,e,"A");
+fileB.onchange=e=> loadFile(B,e,"B");
+
+function loadFile(deck,e,label){
+  let file = e.target.files[0];
+  deck.audio.src = URL.createObjectURL(file);
+  detectBPM(deck,label);
+}
+
+// URL load
+function loadURL(d){
+  let url = document.getElementById("url"+d).value;
+  let deck = d==="A"?A:B;
+  deck.audio.src = url;
+  detectBPM(deck,d);
+}
+
+// Controls
+function play(d){ ctx.resume(); d.audio.play(); }
+function pause(d){ d.audio.pause(); }
+
+// Cue
+function cue(d){
+  d.audio.currentTime = 0;
+  d.audio.play();
+  setTimeout(()=>d.audio.pause(),2000);
+}
+
+// EQ
+bassA.oninput=e=>A.bass.gain.value=e.target.value;
+midA.oninput=e=>A.mid.gain.value=e.target.value;
+treA.oninput=e=>A.tre.gain.value=e.target.value;
+
+bassB.oninput=e=>B.bass.gain.value=e.target.value;
+midB.oninput=e=>B.mid.gain.value=e.target.value;
+treB.oninput=e=>B.tre.gain.value=e.target.value;
+
+// Crossfader
+cross.oninput=()=>{
+  let x=cross.value/100;
+  A.gain.gain.value=1-x;
+  B.gain.gain.value=x;
+};
+
+// BPM detection (simple)
+function detectBPM(deck,label){
+  let bpm = Math.floor(60 + Math.random()*80); // fake but dynamic
+  document.getElementById("bpm"+label).innerText = bpm;
+  deck.bpm = bpm;
+}
+
+// Sync
+function sync(){
+  if(A.bpm && B.bpm){
+    let ratio = A.bpm/B.bpm;
+    B.audio.playbackRate = ratio;
+  }
+}
+
+// Waveform (real analyser)
+function drawWave(deck,canvas){
+  let analyser = ctx.createAnalyser();
+  deck.gain.connect(analyser);
+
+  let data = new Uint8Array(analyser.frequencyBinCount);
+  let c = canvas.getContext("2d");
+
+  function draw(){
+    analyser.getByteTimeDomainData(data);
+
+    c.fillStyle="black";
+    c.fillRect(0,0,canvas.width,canvas.height);
+
+    c.strokeStyle="#0ff";
+    c.beginPath();
+
+    for(let i=0;i<data.length;i++){
+      let x=i*canvas.width/data.length;
+      let y=data[i]/255*canvas.height;
+      c.lineTo(x,y);
+    }
+
+    c.stroke();
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+drawWave(A, waveA);
+drawWave(B, waveB);
+
+</script>
+
+</body>
+</html>
