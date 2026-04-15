@@ -1,190 +1,294 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GOD LEVEL DJ MIXER</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON VIBE | PRO DJ MIXER</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-pink: #ff007b;
+            --bg-dark: #0a0a0c;
+            --panel-grad: linear-gradient(145deg, #1a1a1e, #121214);
+        }
 
-<style>
-body { margin:0; background:#000; color:#0ff; font-family:Arial; text-align:center; }
-.deck { display:inline-block; background:#111; padding:15px; margin:10px; border-radius:15px; width:320px; }
-input[type=range]{ width:100%; }
-canvas { width:100%; height:80px; background:#000; }
-button { margin:5px; padding:8px; background:#0ff; border:none; border-radius:6px; }
-</style>
+        body {
+            background: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-shadow: 0 0 10px var(--neon-blue);
+            letter-spacing: 4px;
+            margin: 20px 0;
+            font-weight: 900;
+        }
+
+        .mixer-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: #111;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .deck {
+            background: var(--panel-grad);
+            width: 350px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #222;
+            position: relative;
+        }
+
+        .deck-a { border-left: 4px solid var(--neon-blue); }
+        .deck-b { border-left: 4px solid var(--neon-pink); }
+
+        .jog-wheel {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #333 10%, #111 80%);
+            border-radius: 50%;
+            margin: 15px auto;
+            border: 5px solid #222;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate 4s linear infinite;
+            animation-play-state: paused;
+        }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        button {
+            background: #222;
+            color: #ccc;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover { background: #333; color: white; }
+        .btn-play { background: #005522; color: #0f0; }
+        .btn-play:active { background: #0f0; color: #000; }
+
+        .eq-section {
+            text-align: left;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--neon-blue);
+            margin: 8px 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 60px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .master-controls {
+            width: 100%;
+            margin-top: 20px;
+            padding: 20px;
+            background: #18181b;
+            border-radius: 15px;
+        }
+
+        .crossfader-wrap {
+            width: 300px;
+            margin: 0 auto;
+        }
+
+        .status { font-size: 0.7rem; color: var(--neon-blue); margin-top: 5px; }
+    </style>
 </head>
-
 <body>
 
-<h1>👑 GOD LEVEL DJ MIXER</h1>
+<h1>NEON VIBE PRO</h1>
 
-<div class="deck">
-<h2>Deck A</h2>
-<input type="file" id="fileA">
-<input placeholder="Song URL" id="urlA">
-<button onclick="loadURL('A')">Load URL</button><br>
+<div class="mixer-container">
+    <div class="deck deck-a" id="deck-A">
+        <div class="status">DECK A - <span id="bpm-A">128</span> BPM</div>
+        <input type="file" id="file-A" accept="audio/*" style="font-size: 0.7rem;">
+        
+        <div class="jog-wheel" id="jog-A">💿</div>
 
-<button onclick="play(A)">▶</button>
-<button onclick="pause(A)">⏸</button>
-<button onclick="cue(A)">🎧 Cue</button>
+        <div class="controls-grid">
+            <button class="btn-play" onclick="playDeck('A')">PLAY</button>
+            <button onclick="pauseDeck('A')">PAUSE</button>
+            <button onclick="cueDeck('A')">CUE</button>
+        </div>
 
-<p>BPM: <span id="bpmA">--</span></p>
+        <div class="eq-section">
+            HI <input type="range" id="hi-A" min="-20" max="20" value="0">
+            MID <input type="range" id="mid-A" min="-20" max="20" value="0">
+            LOW <input type="range" id="low-A" min="-20" max="20" value="0">
+        </div>
+        <canvas id="scope-A"></canvas>
+    </div>
 
-<p>EQ</p>
-Bass <input type="range" id="bassA" min="-30" max="30">
-Mid <input type="range" id="midA" min="-30" max="30">
-Treble <input type="range" id="treA" min="-30" max="30">
+    <div class="deck deck-b" id="deck-B">
+        <div class="status">DECK B - <span id="bpm-B">128</span> BPM</div>
+        <input type="file" id="file-B" accept="audio/*" style="font-size: 0.7rem;">
+        
+        <div class="jog-wheel" id="jog-B">💿</div>
 
-<canvas id="waveA"></canvas>
+        <div class="controls-grid">
+            <button class="btn-play" onclick="playDeck('B')">PLAY</button>
+            <button onclick="pauseDeck('B')">PAUSE</button>
+            <button onclick="cueDeck('B')">CUE</button>
+        </div>
+
+        <div class="eq-section">
+            HI <input type="range" id="hi-B" min="-20" max="20" value="0" style="accent-color: var(--neon-pink);">
+            MID <input type="range" id="mid-B" min="-20" max="20" value="0" style="accent-color: var(--neon-pink);">
+            LOW <input type="range" id="low-B" min="-20" max="20" value="0" style="accent-color: var(--neon-pink);">
+        </div>
+        <canvas id="scope-B"></canvas>
+    </div>
+
+    <div class="master-controls">
+        <div class="crossfader-wrap">
+            <label>CROSSFADER</label>
+            <input type="range" id="crossfader" min="0" max="1" step="0.01" value="0.5">
+            <div style="display:flex; justify-content: space-between; font-size: 0.7rem; color: #666;">
+                <span>DECK A</span>
+                <span>DECK B</span>
+            </div>
+        </div>
+        <button onclick="syncBPM()" style="margin-top: 15px; width: 200px; border-color: var(--neon-blue);">SYNC TEMPO</button>
+    </div>
 </div>
-
-<div class="deck">
-<h2>Deck B</h2>
-<input type="file" id="fileB">
-<input placeholder="Song URL" id="urlB">
-<button onclick="loadURL('B')">Load URL</button><br>
-
-<button onclick="play(B)">▶</button>
-<button onclick="pause(B)">⏸</button>
-<button onclick="cue(B)">🎧 Cue</button>
-
-<p>BPM: <span id="bpmB">--</span></p>
-
-<p>EQ</p>
-Bass <input type="range" id="bassB" min="-30" max="30">
-Mid <input type="range" id="midB" min="-30" max="30">
-Treble <input type="range" id="treB" min="-30" max="30">
-
-<canvas id="waveB"></canvas>
-</div>
-
-<h2>Crossfader</h2>
-<input type="range" id="cross" min="0" max="100" value="50">
-
-<button onclick="sync()">SYNC BPM</button>
 
 <script>
-const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const decks = { A: {}, B: {} };
 
-function createDeck(){
-  let audio = new Audio();
-  let src = ctx.createMediaElementSource(audio);
+    function setupDeck(id) {
+        const audio = new Audio();
+        audio.crossOrigin = "anonymous";
+        const source = audioCtx.createMediaElementSource(audio);
+        
+        // Filter Nodes
+        const hi = audioCtx.createBiquadFilter(); hi.type = "highshelf";
+        const mid = audioCtx.createBiquadFilter(); mid.type = "peaking";
+        const low = audioCtx.createBiquadFilter(); low.type = "lowshelf";
+        const gainNode = audioCtx.createGain();
+        const analyser = audioCtx.createAnalyser();
 
-  let gain = ctx.createGain();
+        // Chain: Source -> Low -> Mid -> Hi -> Gain -> Analyser -> Dest
+        source.connect(low).connect(mid).connect(hi).connect(gainNode).connect(analyser).connect(audioCtx.destination);
 
-  let bass = ctx.createBiquadFilter();
-  bass.type="lowshelf";
+        decks[id] = { audio, gainNode, hi, mid, low, analyser, bpm: 128 };
 
-  let mid = ctx.createBiquadFilter();
-  mid.type="peaking";
-
-  let tre = ctx.createBiquadFilter();
-  tre.type="highshelf";
-
-  src.connect(bass);
-  bass.connect(mid);
-  mid.connect(tre);
-  tre.connect(gain);
-  gain.connect(ctx.destination);
-
-  return {audio,gain,bass,mid,tre};
-}
-
-let A = createDeck();
-let B = createDeck();
-
-// Load file
-fileA.onchange=e=> loadFile(A,e,"A");
-fileB.onchange=e=> loadFile(B,e,"B");
-
-function loadFile(deck,e,label){
-  let file = e.target.files[0];
-  deck.audio.src = URL.createObjectURL(file);
-  detectBPM(deck,label);
-}
-
-// URL load
-function loadURL(d){
-  let url = document.getElementById("url"+d).value;
-  let deck = d==="A"?A:B;
-  deck.audio.src = url;
-  detectBPM(deck,d);
-}
-
-// Controls
-function play(d){ ctx.resume(); d.audio.play(); }
-function pause(d){ d.audio.pause(); }
-
-// Cue
-function cue(d){
-  d.audio.currentTime = 0;
-  d.audio.play();
-  setTimeout(()=>d.audio.pause(),2000);
-}
-
-// EQ
-bassA.oninput=e=>A.bass.gain.value=e.target.value;
-midA.oninput=e=>A.mid.gain.value=e.target.value;
-treA.oninput=e=>A.tre.gain.value=e.target.value;
-
-bassB.oninput=e=>B.bass.gain.value=e.target.value;
-midB.oninput=e=>B.mid.gain.value=e.target.value;
-treB.oninput=e=>B.tre.gain.value=e.target.value;
-
-// Crossfader
-cross.oninput=()=>{
-  let x=cross.value/100;
-  A.gain.gain.value=1-x;
-  B.gain.gain.value=x;
-};
-
-// BPM detection (simple)
-function detectBPM(deck,label){
-  let bpm = Math.floor(60 + Math.random()*80); // fake but dynamic
-  document.getElementById("bpm"+label).innerText = bpm;
-  deck.bpm = bpm;
-}
-
-// Sync
-function sync(){
-  if(A.bpm && B.bpm){
-    let ratio = A.bpm/B.bpm;
-    B.audio.playbackRate = ratio;
-  }
-}
-
-// Waveform (real analyser)
-function drawWave(deck,canvas){
-  let analyser = ctx.createAnalyser();
-  deck.gain.connect(analyser);
-
-  let data = new Uint8Array(analyser.frequencyBinCount);
-  let c = canvas.getContext("2d");
-
-  function draw(){
-    analyser.getByteTimeDomainData(data);
-
-    c.fillStyle="black";
-    c.fillRect(0,0,canvas.width,canvas.height);
-
-    c.strokeStyle="#0ff";
-    c.beginPath();
-
-    for(let i=0;i<data.length;i++){
-      let x=i*canvas.width/data.length;
-      let y=data[i]/255*canvas.height;
-      c.lineTo(x,y);
+        // Visualizer Setup
+        const canvas = document.getElementById(`scope-${id}`);
+        const canvasCtx = canvas.getContext('2d');
+        
+        function draw() {
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteTimeDomainData(data);
+            canvasCtx.fillStyle = '#000';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = id === 'A' ? '#00f2ff' : '#ff007b';
+            canvasCtx.beginPath();
+            let sliceWidth = canvas.width / data.length;
+            let x = 0;
+            for(let i = 0; i < data.length; i++) {
+                let v = data[i] / 128.0;
+                let y = v * canvas.height / 2;
+                if(i === 0) canvasCtx.moveTo(x, y); else canvasCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            canvasCtx.stroke();
+            requestAnimationFrame(draw);
+        }
+        draw();
     }
 
-    c.stroke();
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
+    // Initialize Decks
+    setupDeck('A');
+    setupDeck('B');
 
-drawWave(A, waveA);
-drawWave(B, waveB);
+    // Load Files
+    document.getElementById('file-A').onchange = (e) => loadTrack('A', e);
+    document.getElementById('file-B').onchange = (e) => loadTrack('B', e);
 
+    function loadTrack(id, e) {
+        const file = e.target.files[0];
+        if (file) {
+            decks[id].audio.src = URL.createObjectURL(file);
+            const fakeBpm = Math.floor(Math.random() * (130 - 120 + 1) + 120);
+            decks[id].bpm = fakeBpm;
+            document.getElementById(`bpm-${id}`).innerText = fakeBpm;
+        }
+    }
+
+    // Transport Functions
+    function playDeck(id) { 
+        audioCtx.resume(); 
+        decks[id].audio.play(); 
+        document.getElementById(`jog-${id}`).style.animationPlayState = 'running';
+    }
+    function pauseDeck(id) { 
+        decks[id].audio.pause(); 
+        document.getElementById(`jog-${id}`).style.animationPlayState = 'paused';
+    }
+    function cueDeck(id) {
+        decks[id].audio.currentTime = 0;
+    }
+
+    // EQ Listeners
+    ['A', 'B'].forEach(id => {
+        document.getElementById(`hi-${id}`).oninput = (e) => decks[id].hi.gain.value = e.target.value;
+        document.getElementById(`mid-${id}`).oninput = (e) => decks[id].mid.gain.value = e.target.value;
+        document.getElementById(`low-${id}`).oninput = (e) => decks[id].low.gain.value = e.target.value;
+    });
+
+    // Crossfader Logic (Equal Power)
+    document.getElementById('crossfader').oninput = (e) => {
+        const val = parseFloat(e.target.value);
+        // Deck A gets quieter as slider moves right (val increases)
+        decks.A.gainNode.gain.value = Math.cos(val * 0.5 * Math.PI);
+        // Deck B gets louder as slider moves right
+        decks.B.gainNode.gain.value = Math.sin(val * 0.5 * Math.PI);
+    };
+
+    function syncBPM() {
+        if (decks.A.audio.src && decks.B.audio.src) {
+            const ratio = decks.A.bpm / decks.B.bpm;
+            decks.B.audio.playbackRate = ratio;
+            alert("BPM Synced: Deck B adjusted to match Deck A");
+        }
+    }
 </script>
-
 </body>
 </html>
