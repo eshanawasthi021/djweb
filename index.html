@@ -3,463 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHANTOM DJ PRO</title>
+    <title>PHANTOM DJ | CLOUD PRO</title>
     <style>
         :root {
-            --neon-primary: #00f2ff;
-            --neon-secondary: #bc13fe;
-            --surface: #121214;
-            --panel: #1e1e22;
-            --glass: rgba(255, 255, 255, 0.05);
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --bg: #08080a;
+            --deck-bg: #141417;
+            --text: #e0e0e0;
         }
 
         body {
-            background: #050505;
-            color: #e0e0e0;
-            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            user-select: none;
         }
 
-        /* --- Header --- */
-        header {
+        /* --- Music Library Bar --- */
+        .library-shelf {
             width: 100%;
-            padding: 15px;
-            background: var(--surface);
+            background: #111;
+            padding: 10px;
             border-bottom: 1px solid #333;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-
-        .logo {
-            font-weight: 900;
-            letter-spacing: 5px;
-            background: linear-gradient(to right, var(--neon-primary), var(--neon-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 1.5rem;
-        }
-
-        /* --- Main Mixer Layout --- */
-        .mixer-grid {
-            display: grid;
-            grid-template-columns: 1fr 250px 1fr;
-            gap: 10px;
-            padding: 20px;
-            max-width: 1400px;
-            width: 100%;
-        }
-
-        /* --- Decks --- */
-        .deck {
-            background: var(--panel);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid #333;
-            position: relative;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
-        }
-
-        .deck-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            gap: 15px;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
-        .track-info {
-            text-align: left;
-            flex-grow: 1;
-            margin-left: 10px;
+        .track-card {
+            background: #222;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #444;
+            font-size: 0.8rem;
+            transition: 0.3s;
         }
 
-        .track-title { font-size: 0.9rem; font-weight: bold; color: var(--neon-primary); }
-        
-        /* Jog Wheel */
-        .jog-container {
-            position: relative;
-            width: 220px;
-            height: 220px;
-            margin: 20px auto;
-        }
+        .track-card:hover { border-color: var(--neon-blue); background: #2a2a2a; }
 
-        .jog-wheel {
+        /* --- Mixer Layout --- */
+        .main-interface {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            max-width: 1200px;
             width: 100%;
-            height: 100%;
+        }
+
+        .deck {
+            flex: 1;
+            background: var(--deck-bg);
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid #2a2a2e;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .deck-a { border-bottom: 4px solid var(--neon-blue); }
+        .deck-b { border-bottom: 4px solid var(--neon-purple); }
+
+        /* --- Jog Wheel --- */
+        .jog-outer {
+            width: 180px;
+            height: 180px;
+            margin: 20px auto;
             border-radius: 50%;
-            background: conic-gradient(#111, #222, #111, #333, #111);
-            border: 8px solid #000;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 10px var(--neon-primary);
+            background: radial-gradient(circle, #222 30%, #000 100%);
+            border: 10px solid #1a1a1c;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s linear;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
 
-        .jog-center {
+        .jog-inner {
             width: 60px;
             height: 60px;
-            background: #000;
+            background: #111;
             border-radius: 50%;
             border: 2px solid #333;
         }
 
-        /* Pitch Fader */
-        .pitch-fader-wrap {
-            position: absolute;
-            right: 20px;
-            top: 100px;
-            height: 200px;
-            width: 40px;
+        /* --- Controls --- */
+        .knob-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .fx-btn {
+            background: #2a2a2e;
+            border: none;
+            color: #aaa;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .fx-btn.active { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+
+        .play-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: #1db954;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .play-btn:active { transform: scale(0.95); }
+
+        /* --- Center Strip --- */
+        .mixer-center {
+            width: 120px;
+            background: #18181b;
+            border-radius: 15px;
+            padding: 20px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 30px;
         }
 
-        .pitch-fader {
-            writing-mode: bt-lr; /* Vertical */
+        .fader-vertical {
+            writing-mode: bt-lr;
             -webkit-appearance: slider-vertical;
-            width: 8px;
+            width: 10px;
             height: 150px;
         }
 
-        /* Controls */
-        .pad-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .pad {
-            background: #2a2a2e;
-            border: none;
-            padding: 12px;
-            border-radius: 4px;
-            color: #888;
-            font-size: 0.7rem;
-            cursor: pointer;
-            border-bottom: 3px solid #111;
-        }
-
-        .pad:active { transform: translateY(2px); border-bottom: 1px solid #111; }
-        .pad.active { background: var(--neon-primary); color: #000; box-shadow: 0 0 10px var(--neon-primary); }
-
-        /* --- Central Mixer Section --- */
-        .center-strip {
-            background: #18181b;
-            border-radius: 10px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid #333;
-        }
-
-        .knob-group {
-            margin-bottom: 20px;
+        canvas {
             width: 100%;
-        }
-
-        label { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: bold; }
-
-        input[type=range] {
-            width: 100%;
-            height: 6px;
-            background: #333;
-            border-radius: 5px;
-            outline: none;
-            accent-color: var(--neon-primary);
-        }
-
-        .level-meter {
-            width: 10px;
-            height: 100px;
-            background: #111;
-            margin: 5px;
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .meter-fill {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background: linear-gradient(to top, #0f0, #ff0, #f00);
-            height: 0%;
-            transition: height 0.1s;
-        }
-
-        .transport-main {
-            display: flex;
-            gap: 10px;
-            margin-top: auto;
-            width: 100%;
-        }
-
-        .btn-big {
-            flex: 1;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: 900;
-            cursor: pointer;
-            border: none;
-        }
-
-        .play-btn { background: #00ff88; color: #000; }
-        .cue-btn { background: #ffaa00; color: #000; }
-
-        .waveform-main {
-            grid-column: span 3;
-            height: 100px;
+            height: 50px;
             background: #000;
+            border-radius: 8px;
             margin-top: 10px;
-            border-radius: 10px;
-            border: 1px solid #222;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">PHANTOM DJ PRO</div>
-</header>
-
-<div class="mixer-grid">
-    <div class="deck">
-        <div class="deck-header">
-            <input type="file" id="file-A" hidden>
-            <button onclick="document.getElementById('file-A').click()" class="pad">LOAD</button>
-            <div class="track-info">
-                <div class="track-title" id="title-A">NO TRACK LOADED</div>
-                <div style="font-size: 0.7rem; color: #666;">BPM: <span id="bpm-A">0.0</span></div>
-            </div>
-        </div>
-
-        <div class="jog-container">
-            <div class="jog-wheel" id="jog-A">
-                <div class="jog-center"></div>
-            </div>
-            <div class="pitch-fader-wrap">
-                <label>PITCH</label>
-                <input type="range" class="pitch-fader" id="pitch-A" min="0.9" max="1.1" step="0.001" value="1">
-            </div>
-        </div>
-
-        <div class="pad-grid">
-            <button class="pad" onclick="setHotCue('A', 1)">CUE 1</button>
-            <button class="pad" onclick="setHotCue('A', 2)">CUE 2</button>
-            <button class="pad" onclick="toggleLoop('A', 4)">4 BAR</button>
-            <button class="pad" onclick="toggleLoop('A', 8)">8 BAR</button>
-        </div>
-
-        <div class="transport-main">
-            <button class="btn-big cue-btn" onmousedown="cueStart('A')" onmouseup="cueStop('A')">CUE</button>
-            <button class="btn-big play-btn" id="play-A" onclick="togglePlay('A')">PLAY</button>
-        </div>
+<div class="library-shelf" id="library">
+    <div style="padding: 10px; font-weight: bold; color: var(--neon-blue);">STREAMING LIBRARY:</div>
     </div>
 
-    <div class="center-strip">
-        <div class="knob-group">
-            <label>Master Gain</label>
-            <input type="range" id="master-gain" min="0" max="1.5" step="0.01" value="1">
-        </div>
-
-        <div style="display:flex; gap: 20px; flex-grow: 1;">
-            <div class="eq-column">
-                <label>Deck A</label>
-                <input type="range" id="vol-A" min="0" max="1" step="0.01" value="0.8">
-                <div class="level-meter"><div class="meter-fill" id="meter-A"></div></div>
-            </div>
-            
-            <div class="eq-column">
-                <label>Deck B</label>
-                <input type="range" id="vol-B" min="0" max="1" step="0.01" value="0.8">
-                <div class="level-meter"><div class="meter-fill" id="meter-B"></div></div>
-            </div>
-        </div>
-
-        <div class="knob-group" style="margin-top: 20px;">
-            <label>Crossfader</label>
-            <input type="range" id="xfade" min="0" max="1" step="0.01" value="0.5">
+<div class="main-interface">
+    <div class="deck deck-a">
+        <div style="display:flex; justify-content: space-between;">
+            <span id="title-A">Deck A Empty</span>
+            <span style="color:var(--neon-blue)" id="bpm-A">124.0</span>
         </div>
         
-        <button class="pad active" style="width:100%" onclick="sync()">SYNC TEMPO</button>
+        <div class="jog-outer" id="jog-A">
+            <div class="jog-inner"></div>
+        </div>
+
+        <div class="knob-grid">
+            <button class="fx-btn" onclick="setFilter('A', 'lowpass')">Low Pass</button>
+            <button class="fx-btn" onclick="setFilter('A', 'highpass')">Hi Pass</button>
+            <button class="fx-btn" onclick="resetFilter('A')">Reset</button>
+        </div>
+
+        <button class="play-btn" id="btn-A" onclick="togglePlay('A')">PLAY</button>
+        <canvas id="scope-A"></canvas>
     </div>
 
-    <div class="deck">
-        <div class="deck-header">
-            <input type="file" id="file-B" hidden>
-            <div class="track-info" style="text-align: right; margin-right: 10px;">
-                <div class="track-title" id="title-B" style="color: var(--neon-secondary);">NO TRACK LOADED</div>
-                <div style="font-size: 0.7rem; color: #666;">BPM: <span id="bpm-B">0.0</span></div>
-            </div>
-            <button onclick="document.getElementById('file-B').click()" class="pad">LOAD</button>
-        </div>
-
-        <div class="jog-container">
-            <div class="jog-wheel" id="jog-B" style="inset: 0; box-shadow: inset 0 0 10px var(--neon-secondary);">
-                <div class="jog-center"></div>
-            </div>
-            <div class="pitch-fader-wrap">
-                <label>PITCH</label>
-                <input type="range" class="pitch-fader" id="pitch-B" min="0.9" max="1.1" step="0.001" value="1">
-            </div>
-        </div>
-
-        <div class="pad-grid">
-            <button class="pad" onclick="setHotCue('B', 1)">CUE 1</button>
-            <button class="pad" onclick="setHotCue('B', 2)">CUE 2</button>
-            <button class="pad" onclick="toggleLoop('B', 4)">4 BAR</button>
-            <button class="pad" onclick="toggleLoop('B', 8)">8 BAR</button>
-        </div>
-
-        <div class="transport-main">
-            <button class="btn-big cue-btn" onmousedown="cueStart('B')" onmouseup="cueStop('B')">CUE</button>
-            <button class="btn-big play-btn" id="play-B" onclick="togglePlay('B')" style="background: var(--neon-secondary);">PLAY</button>
-        </div>
+    <div class="mixer-center">
+        <label style="font-size:0.6rem">VOL A</label>
+        <input type="range" class="fader-vertical" id="vol-A" min="0" max="1" step="0.01" value="0.7">
+        
+        <label style="font-size:0.6rem">VOL B</label>
+        <input type="range" class="fader-vertical" id="vol-B" min="0" max="1" step="0.01" value="0.7">
+        
+        <button class="fx-btn" style="background:#444" onclick="sync()">SYNC</button>
     </div>
 
-    <canvas class="waveform-main" id="master-visual"></canvas>
+    <div class="deck deck-b">
+        <div style="display:flex; justify-content: space-between;">
+            <span id="title-B">Deck B Empty</span>
+            <span style="color:var(--neon-purple)" id="bpm-B">128.0</span>
+        </div>
+        
+        <div class="jog-outer" id="jog-B" style="box-shadow: 0 0 20px rgba(188, 19, 254, 0.2);">
+            <div class="jog-inner"></div>
+        </div>
+
+        <div class="knob-grid">
+            <button class="fx-btn" onclick="setFilter('B', 'lowpass')">Low Pass</button>
+            <button class="fx-btn" onclick="setFilter('B', 'highpass')">Hi Pass</button>
+            <button class="fx-btn" onclick="resetFilter('B')">Reset</button>
+        </div>
+
+        <button class="play-btn" id="btn-B" onclick="togglePlay('B')" style="background:var(--neon-purple)">PLAY</button>
+        <canvas id="scope-B"></canvas>
+    </div>
 </div>
 
 <script>
+    // --- Online Track Database ---
+    const cloudTracks = [
+        { name: "Tech House 1", url: "https://www.bensound.com/bensound-music/bensound-energy.mp3", bpm: 124 },
+        { name: "Cyberpunk", url: "https://www.bensound.com/bensound-music/bensound-house.mp3", bpm: 126 },
+        { name: "Deep Techno", url: "https://www.bensound.com/bensound-music/bensound-deepblue.mp3", bpm: 128 },
+        { name: "Lofi Beats", url: "https://www.bensound.com/bensound-music/bensound-slowmotion.mp3", bpm: 90 }
+    ];
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const decks = { A: {}, B: {} };
-    const masterGain = audioCtx.createGain();
-    const masterAnalyser = audioCtx.createAnalyser();
-    masterGain.connect(masterAnalyser).connect(audioCtx.destination);
+
+    // Create Library UI
+    const lib = document.getElementById('library');
+    cloudTracks.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'track-card';
+        div.innerHTML = `<strong>${t.name}</strong> <br> ${t.bpm} BPM`;
+        div.onclick = () => loadToDeck(t);
+        lib.appendChild(div);
+    });
+
+    let targetDeck = 'A';
+    function loadToDeck(track) {
+        const d = decks[targetDeck];
+        d.audio.src = track.url;
+        d.bpm = track.bpm;
+        document.getElementById(`title-${targetDeck}`).innerText = track.name;
+        document.getElementById(`bpm-${targetDeck}`).innerText = track.bpm;
+        targetDeck = targetDeck === 'A' ? 'B' : 'A'; // Toggle load target
+    }
 
     function initDeck(id) {
         const audio = new Audio();
-        audio.loop = false;
+        audio.crossOrigin = "anonymous";
         const source = audioCtx.createMediaElementSource(audio);
+        const filter = audioCtx.createBiquadFilter();
         const gain = audioCtx.createGain();
         const analyser = audioCtx.createAnalyser();
-        
-        source.connect(gain).connect(masterGain);
-        gain.connect(analyser);
 
-        decks[id] = {
-            audio, gain, analyser,
-            bpm: 128,
-            cues: {},
-            isLooping: false,
-            rotation: 0
-        };
+        source.connect(filter).connect(gain).connect(analyser).connect(audioCtx.destination);
 
-        // Pitch Control
-        document.getElementById(`pitch-${id}`).oninput = (e) => {
-            decks[id].audio.playbackRate = e.target.value;
-        };
+        decks[id] = { audio, filter, gain, analyser, bpm: 120, rotation: 0 };
 
-        // Volume Control
-        document.getElementById(`vol-${id}`).oninput = (e) => {
-            decks[id].gain.gain.value = e.target.value;
-        };
+        // Visualizer
+        const canvas = document.getElementById(`scope-${id}`);
+        const ctx = canvas.getContext('2d');
+        function draw() {
+            const data = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteTimeDomainData(data);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0,0,canvas.width, canvas.height);
+            ctx.strokeStyle = id === 'A' ? '#00f2ff' : '#bc13fe';
+            ctx.beginPath();
+            let x = 0;
+            let slice = canvas.width / data.length;
+            for(let i=0; i<data.length; i++){
+                let y = (data[i]/255) * canvas.height;
+                if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                x += slice;
+            }
+            ctx.stroke();
+            if(!audio.paused) {
+                decks[id].rotation += 2;
+                document.getElementById(`jog-${id}`).style.transform = `rotate(${decks[id].rotation}deg)`;
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
     }
 
     initDeck('A');
     initDeck('B');
 
-    // --- File Loading ---
-    document.getElementById('file-A').onchange = e => loadTrack('A', e);
-    document.getElementById('file-B').onchange = e => loadTrack('B', e);
-
-    function loadTrack(id, e) {
-        const file = e.target.files[0];
-        if(!file) return;
-        decks[id].audio.src = URL.createObjectURL(file);
-        document.getElementById(`title-${id}`).innerText = file.name.toUpperCase();
-        const randomBpm = (Math.random() * 10 + 120).toFixed(1);
-        decks[id].bpm = parseFloat(randomBpm);
-        document.getElementById(`bpm-${id}`).innerText = randomBpm;
-    }
-
-    // --- Transport ---
+    // Controls
     function togglePlay(id) {
         audioCtx.resume();
-        const d = decks[id];
-        const btn = document.getElementById(`play-${id}`);
-        if(d.audio.paused) {
-            d.audio.play();
-            btn.innerText = "PAUSE";
-            btn.style.boxShadow = "0 0 20px #0f8";
-        } else {
-            d.audio.pause();
-            btn.innerText = "PLAY";
-            btn.style.boxShadow = "none";
-        }
+        const d = decks[id].audio;
+        if(d.paused) { d.play(); document.getElementById(`btn-${id}`).innerText = "PAUSE"; }
+        else { d.pause(); document.getElementById(`btn-${id}`).innerText = "PLAY"; }
     }
 
-    function cueStart(id) {
-        decks[id].audio.currentTime = decks[id].cues[1] || 0;
-        decks[id].audio.play();
+    function setFilter(id, type) {
+        decks[id].filter.type = type;
+        decks[id].filter.frequency.value = type === 'lowpass' ? 800 : 2500;
     }
 
-    function cueStop(id) {
-        decks[id].audio.pause();
-        decks[id].audio.currentTime = decks[id].cues[1] || 0;
+    function resetFilter(id) {
+        decks[id].filter.type = 'allpass';
     }
 
-    function setHotCue(id, num) {
-        decks[id].cues[num] = decks[id].audio.currentTime;
-        alert(`Cue ${num} set for Deck ${id}`);
-    }
-
-    // --- Crossfader ---
-    document.getElementById('xfade').oninput = e => {
-        const val = parseFloat(e.target.value);
-        decks.A.gain.gain.value = Math.cos(val * 0.5 * Math.PI);
-        decks.B.gain.gain.value = Math.sin(val * 0.5 * Math.PI);
-    };
-
-    // --- Visualizer & Meters ---
-    const vCanvas = document.getElementById('master-visual');
-    const vCtx = vCanvas.getContext('2d');
-
-    function update() {
-        // Update Meters
-        ['A', 'B'].forEach(id => {
-            const data = new Uint8Array(1);
-            decks[id].analyser.getByteFrequencyData(data);
-            document.getElementById(`meter-${id}`).style.height = (data[0] / 2.5) + '%';
-            
-            // Rotate Jog
-            if(!decks[id].audio.paused) {
-                decks[id].rotation += (2 * decks[id].audio.playbackRate);
-                document.getElementById(`jog-${id}`).style.transform = `rotate(${decks[id].rotation}deg)`;
-            }
-        });
-
-        // Master Waveform
-        const waveData = new Uint8Array(masterAnalyser.frequencyBinCount);
-        masterAnalyser.getByteTimeDomainData(waveData);
-        vCtx.fillStyle = '#000';
-        vCtx.fillRect(0,0,vCanvas.width, vCanvas.height);
-        vCtx.strokeStyle = '#bc13fe';
-        vCtx.beginPath();
-        let x = 0;
-        let slice = vCanvas.width / waveData.length;
-        for(let i=0; i<waveData.length; i++) {
-            let y = (waveData[i]/255.0) * vCanvas.height;
-            if(i===0) vCtx.moveTo(x,y); else vCtx.lineTo(x,y);
-            x += slice;
-        }
-        vCtx.stroke();
-
-        requestAnimationFrame(update);
-    }
-    update();
+    document.getElementById('vol-A').oninput = e => decks.A.gain.gain.value = e.target.value;
+    document.getElementById('vol-B').oninput = e => decks.B.gain.gain.value = e.target.value;
 
     function sync() {
         decks.B.audio.playbackRate = decks.A.bpm / decks.B.bpm;
-        document.getElementById('pitch-B').value = decks.B.audio.playbackRate;
-        alert("BPM Synced to Deck A!");
     }
 </script>
 </body>
