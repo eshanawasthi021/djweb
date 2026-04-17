@@ -1,113 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>YouTube Live Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-      background: #111;
-      color: #fff;
-      text-align: center;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      background: red;
-      color: white;
-      cursor: pointer;
-    }
-    .card {
-      background: #222;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Ultimate YouTube Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body{margin:0;font-family:sans-serif;background:#0f172a;color:#e2e8f0}
+header{padding:20px;text-align:center;background:#020617}
+.container{padding:20px;max-width:1200px;margin:auto}
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+input{padding:10px;border-radius:8px;border:none;width:300px}
+button{padding:10px;border:none;border-radius:8px;background:#ef4444;color:white;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}
+.card{background:#020617;padding:15px;border-radius:12px}
+img{width:100%;border-radius:10px}
+.big{font-size:20px;font-weight:bold;margin:10px 0}
+.alert{color:#22c55e}
+canvas{margin-top:30px;background:#020617;padding:10px;border-radius:12px}
+</style>
 </head>
 <body>
+<header>🚀 Ultimate YouTube Analytics</header>
+<div class="container">
+<div class="controls">
+<input id="input" placeholder="Paste YouTube URL or Video ID">
+<button onclick="addVideo()">Add</button>
+</div>
+<div id="videos" class="grid"></div>
+<canvas id="chart"></canvas>
+</div>
 
-  <h1>YouTube Multi Video Dashboard</h1>
-
-  <input id="videoId" placeholder="Enter YouTube Video ID">
-  <button onclick="addVideo()">Add Video</button>
-
-  <div id="videos"></div>
-
-  <canvas id="chart" width="600" height="300"></canvas>
+<audio id="alertSound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3"></audio>
 
 <script>
-const API_KEY = "AIzaSyAMWMIMz-otNn2qNxma4Aii6A5rqMy2d5o";
-let videoIds = [];
-let viewHistory = {};
+const API_KEY="AIzaSyAMWMIMz-otNn2qNxma4Aii6A5rqMy2d5o";
+let videoIds=[];
+let history={};
 let chart;
 
-function addVideo() {
-  const id = document.getElementById("videoId").value;
-  if (!id) return;
+function extractId(url){
+  if(url.includes("youtube.com")){
+    const urlObj=new URL(url);
+    return urlObj.searchParams.get("v");
+  }
+  if(url.includes("youtu.be")){
+    return url.split("/").pop();
+  }
+  return url;
+}
+
+function addVideo(){
+  const input=document.getElementById("input").value.trim();
+  const id=extractId(input);
+  if(!id||videoIds.includes(id))return;
 
   videoIds.push(id);
-  viewHistory[id] = [];
+  history[id]=JSON.parse(localStorage.getItem(id)||"[]");
 
-  const div = document.createElement("div");
-  div.className = "card";
-  div.id = id;
-  div.innerHTML = `
-    <h3>${id}</h3>
-    <p>Views: <span class="views">Loading...</span></p>
+  const div=document.createElement("div");
+  div.className="card";
+  div.id=id;
+  div.innerHTML=`
+    <img class="thumb" src="https://img.youtube.com/vi/${id}/hqdefault.jpg">
+    <h3 class="title">Loading...</h3>
+    <div class="big views">0</div>
+    <div>Likes: <span class="likes"></span></div>
+    <div>Comments: <span class="comments"></span></div>
+    <div class="alert"></div>
   `;
 
   document.getElementById("videos").appendChild(div);
 }
 
-async function fetchData() {
-  if (videoIds.length === 0) return;
+async function fetchData(){
+  if(videoIds.length===0)return;
 
-  const ids = videoIds.join(",");
+  const res=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds.join(",")}&key=${API_KEY}`);
+  const data=await res.json();
 
-  const res = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${ids}&key=${API_KEY}`
-  );
+  data.items.forEach(v=>{
+    const id=v.id;
+    const views=parseInt(v.statistics.viewCount);
+    const prev=history[id].slice(-1)[0]||0;
 
-  const data = await res.json();
+    const card=document.getElementById(id);
+    card.querySelector(".title").innerText=v.snippet.title;
+    card.querySelector(".views").innerText=views;
+    card.querySelector(".likes").innerText=v.statistics.likeCount||0;
+    card.querySelector(".comments").innerText=v.statistics.commentCount||0;
 
-  data.items.forEach(video => {
-    const views = parseInt(video.statistics.viewCount);
+    if(views-prev>100){
+      card.querySelector(".alert").innerText="🔥 Viral spike!";
+      document.getElementById("alertSound").play();
+    }else{
+      card.querySelector(".alert").innerText="";
+    }
 
-    document.querySelector(`#${video.id} .views`).innerText = views;
-
-    viewHistory[video.id].push(views);
+    history[id].push(views);
+    localStorage.setItem(id,JSON.stringify(history[id]));
   });
 
   updateChart();
 }
 
-function updateChart() {
-  const labels = Array.from({length: viewHistory[videoIds[0]]?.length || 0}, (_, i) => i);
+function updateChart(){
+  if(videoIds.length===0)return;
+  const labels=history[videoIds[0]].map((_,i)=>i);
 
-  const datasets = videoIds.map(id => ({
-    label: id,
-    data: viewHistory[id],
-    borderWidth: 2
-  }));
+  const datasets=videoIds.map(id=>({label:id,data:history[id],tension:0.3}));
 
-  if (chart) chart.destroy();
+  if(chart)chart.destroy();
 
-  const ctx = document.getElementById("chart");
-  chart = new Chart(ctx, {
-    type: "line",
-    data: { labels, datasets }
+  chart=new Chart(document.getElementById("chart"),{
+    type:"line",
+    data:{labels,datasets}
   });
 }
 
-setInterval(fetchData, 5000);
+setInterval(fetchData,5000);
 </script>
-
 </body>
 </html>
