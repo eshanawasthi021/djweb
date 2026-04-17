@@ -1,316 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHANTOM DJ | CLOUD PRO</title>
-    <style>
-        :root {
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --bg: #08080a;
-            --deck-bg: #141417;
-            --text: #e0e0e0;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* --- Music Library Bar --- */
-        .library-shelf {
-            width: 100%;
-            background: #111;
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .track-card {
-            background: #222;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            border: 1px solid #444;
-            font-size: 0.8rem;
-            transition: 0.3s;
-        }
-
-        .track-card:hover { border-color: var(--neon-blue); background: #2a2a2a; }
-
-        /* --- Mixer Layout --- */
-        .main-interface {
-            display: flex;
-            gap: 15px;
-            padding: 20px;
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        .deck {
-            flex: 1;
-            background: var(--deck-bg);
-            border-radius: 24px;
-            padding: 25px;
-            border: 1px solid #2a2a2e;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        .deck-a { border-bottom: 4px solid var(--neon-blue); }
-        .deck-b { border-bottom: 4px solid var(--neon-purple); }
-
-        /* --- Jog Wheel --- */
-        .jog-outer {
-            width: 180px;
-            height: 180px;
-            margin: 20px auto;
-            border-radius: 50%;
-            background: radial-gradient(circle, #222 30%, #000 100%);
-            border: 10px solid #1a1a1c;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
-
-        .jog-inner {
-            width: 60px;
-            height: 60px;
-            background: #111;
-            border-radius: 50%;
-            border: 2px solid #333;
-        }
-
-        /* --- Controls --- */
-        .knob-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .fx-btn {
-            background: #2a2a2e;
-            border: none;
-            color: #aaa;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        .fx-btn.active { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
-
-        .play-btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            background: #1db954;
-            color: white;
-            transition: 0.2s;
-        }
-
-        .play-btn:active { transform: scale(0.95); }
-
-        /* --- Center Strip --- */
-        .mixer-center {
-            width: 120px;
-            background: #18181b;
-            border-radius: 15px;
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-        }
-
-        .fader-vertical {
-            writing-mode: bt-lr;
-            -webkit-appearance: slider-vertical;
-            width: 10px;
-            height: 150px;
-        }
-
-        canvas {
-            width: 100%;
-            height: 50px;
-            background: #000;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>YouTube Live Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: #fff;
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background: red;
+      color: white;
+      cursor: pointer;
+    }
+    .card {
+      background: #222;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="library-shelf" id="library">
-    <div style="padding: 10px; font-weight: bold; color: var(--neon-blue);">STREAMING LIBRARY:</div>
-    </div>
+  <h1>YouTube Multi Video Dashboard</h1>
 
-<div class="main-interface">
-    <div class="deck deck-a">
-        <div style="display:flex; justify-content: space-between;">
-            <span id="title-A">Deck A Empty</span>
-            <span style="color:var(--neon-blue)" id="bpm-A">124.0</span>
-        </div>
-        
-        <div class="jog-outer" id="jog-A">
-            <div class="jog-inner"></div>
-        </div>
+  <input id="videoId" placeholder="Enter YouTube Video ID">
+  <button onclick="addVideo()">Add Video</button>
 
-        <div class="knob-grid">
-            <button class="fx-btn" onclick="setFilter('A', 'lowpass')">Low Pass</button>
-            <button class="fx-btn" onclick="setFilter('A', 'highpass')">Hi Pass</button>
-            <button class="fx-btn" onclick="resetFilter('A')">Reset</button>
-        </div>
+  <div id="videos"></div>
 
-        <button class="play-btn" id="btn-A" onclick="togglePlay('A')">PLAY</button>
-        <canvas id="scope-A"></canvas>
-    </div>
-
-    <div class="mixer-center">
-        <label style="font-size:0.6rem">VOL A</label>
-        <input type="range" class="fader-vertical" id="vol-A" min="0" max="1" step="0.01" value="0.7">
-        
-        <label style="font-size:0.6rem">VOL B</label>
-        <input type="range" class="fader-vertical" id="vol-B" min="0" max="1" step="0.01" value="0.7">
-        
-        <button class="fx-btn" style="background:#444" onclick="sync()">SYNC</button>
-    </div>
-
-    <div class="deck deck-b">
-        <div style="display:flex; justify-content: space-between;">
-            <span id="title-B">Deck B Empty</span>
-            <span style="color:var(--neon-purple)" id="bpm-B">128.0</span>
-        </div>
-        
-        <div class="jog-outer" id="jog-B" style="box-shadow: 0 0 20px rgba(188, 19, 254, 0.2);">
-            <div class="jog-inner"></div>
-        </div>
-
-        <div class="knob-grid">
-            <button class="fx-btn" onclick="setFilter('B', 'lowpass')">Low Pass</button>
-            <button class="fx-btn" onclick="setFilter('B', 'highpass')">Hi Pass</button>
-            <button class="fx-btn" onclick="resetFilter('B')">Reset</button>
-        </div>
-
-        <button class="play-btn" id="btn-B" onclick="togglePlay('B')" style="background:var(--neon-purple)">PLAY</button>
-        <canvas id="scope-B"></canvas>
-    </div>
-</div>
+  <canvas id="chart" width="600" height="300"></canvas>
 
 <script>
-    // --- Online Track Database ---
-    const cloudTracks = [
-        { name: "Tech House 1", url: "https://www.bensound.com/bensound-music/bensound-energy.mp3", bpm: 124 },
-        { name: "Cyberpunk", url: "https://www.bensound.com/bensound-music/bensound-house.mp3", bpm: 126 },
-        { name: "Deep Techno", url: "https://www.bensound.com/bensound-music/bensound-deepblue.mp3", bpm: 128 },
-        { name: "Lofi Beats", url: "https://www.bensound.com/bensound-music/bensound-slowmotion.mp3", bpm: 90 }
-    ];
+const API_KEY = "AIzaSyAMWMIMz-otNn2qNxma4Aii6A5rqMy2d5o";
+let videoIds = [];
+let viewHistory = {};
+let chart;
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const decks = { A: {}, B: {} };
+function addVideo() {
+  const id = document.getElementById("videoId").value;
+  if (!id) return;
 
-    // Create Library UI
-    const lib = document.getElementById('library');
-    cloudTracks.forEach(t => {
-        const div = document.createElement('div');
-        div.className = 'track-card';
-        div.innerHTML = `<strong>${t.name}</strong> <br> ${t.bpm} BPM`;
-        div.onclick = () => loadToDeck(t);
-        lib.appendChild(div);
-    });
+  videoIds.push(id);
+  viewHistory[id] = [];
 
-    let targetDeck = 'A';
-    function loadToDeck(track) {
-        const d = decks[targetDeck];
-        d.audio.src = track.url;
-        d.bpm = track.bpm;
-        document.getElementById(`title-${targetDeck}`).innerText = track.name;
-        document.getElementById(`bpm-${targetDeck}`).innerText = track.bpm;
-        targetDeck = targetDeck === 'A' ? 'B' : 'A'; // Toggle load target
-    }
+  const div = document.createElement("div");
+  div.className = "card";
+  div.id = id;
+  div.innerHTML = `
+    <h3>${id}</h3>
+    <p>Views: <span class="views">Loading...</span></p>
+  `;
 
-    function initDeck(id) {
-        const audio = new Audio();
-        audio.crossOrigin = "anonymous";
-        const source = audioCtx.createMediaElementSource(audio);
-        const filter = audioCtx.createBiquadFilter();
-        const gain = audioCtx.createGain();
-        const analyser = audioCtx.createAnalyser();
+  document.getElementById("videos").appendChild(div);
+}
 
-        source.connect(filter).connect(gain).connect(analyser).connect(audioCtx.destination);
+async function fetchData() {
+  if (videoIds.length === 0) return;
 
-        decks[id] = { audio, filter, gain, analyser, bpm: 120, rotation: 0 };
+  const ids = videoIds.join(",");
 
-        // Visualizer
-        const canvas = document.getElementById(`scope-${id}`);
-        const ctx = canvas.getContext('2d');
-        function draw() {
-            const data = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteTimeDomainData(data);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
-            ctx.strokeStyle = id === 'A' ? '#00f2ff' : '#bc13fe';
-            ctx.beginPath();
-            let x = 0;
-            let slice = canvas.width / data.length;
-            for(let i=0; i<data.length; i++){
-                let y = (data[i]/255) * canvas.height;
-                if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-                x += slice;
-            }
-            ctx.stroke();
-            if(!audio.paused) {
-                decks[id].rotation += 2;
-                document.getElementById(`jog-${id}`).style.transform = `rotate(${decks[id].rotation}deg)`;
-            }
-            requestAnimationFrame(draw);
-        }
-        draw();
-    }
+  const res = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${ids}&key=${API_KEY}`
+  );
 
-    initDeck('A');
-    initDeck('B');
+  const data = await res.json();
 
-    // Controls
-    function togglePlay(id) {
-        audioCtx.resume();
-        const d = decks[id].audio;
-        if(d.paused) { d.play(); document.getElementById(`btn-${id}`).innerText = "PAUSE"; }
-        else { d.pause(); document.getElementById(`btn-${id}`).innerText = "PLAY"; }
-    }
+  data.items.forEach(video => {
+    const views = parseInt(video.statistics.viewCount);
 
-    function setFilter(id, type) {
-        decks[id].filter.type = type;
-        decks[id].filter.frequency.value = type === 'lowpass' ? 800 : 2500;
-    }
+    document.querySelector(`#${video.id} .views`).innerText = views;
 
-    function resetFilter(id) {
-        decks[id].filter.type = 'allpass';
-    }
+    viewHistory[video.id].push(views);
+  });
 
-    document.getElementById('vol-A').oninput = e => decks.A.gain.gain.value = e.target.value;
-    document.getElementById('vol-B').oninput = e => decks.B.gain.gain.value = e.target.value;
+  updateChart();
+}
 
-    function sync() {
-        decks.B.audio.playbackRate = decks.A.bpm / decks.B.bpm;
-    }
+function updateChart() {
+  const labels = Array.from({length: viewHistory[videoIds[0]]?.length || 0}, (_, i) => i);
+
+  const datasets = videoIds.map(id => ({
+    label: id,
+    data: viewHistory[id],
+    borderWidth: 2
+  }));
+
+  if (chart) chart.destroy();
+
+  const ctx = document.getElementById("chart");
+  chart = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets }
+  });
+}
+
+setInterval(fetchData, 5000);
 </script>
+
 </body>
 </html>
