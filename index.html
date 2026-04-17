@@ -1,149 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Ultimate YouTube SaaS Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-<style>
-body{margin:0;font-family:sans-serif;background:#0f172a;color:#e2e8f0}
-header{padding:15px;text-align:center;background:#020617}
-nav{display:flex;justify-content:center;gap:15px;margin:10px}
-button{padding:8px 12px;border:none;border-radius:6px;background:#ef4444;color:white;cursor:pointer}
-.container{padding:20px}
-.hidden{display:none}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px}
-.card{background:#020617;padding:15px;border-radius:10px}
-.big{font-size:20px;font-weight:bold}
-</style>
+  <title>YouTube Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {background:#111;color:#fff;font-family:sans-serif;text-align:center}
+    input,button{padding:10px;margin:5px;border-radius:5px;border:none}
+    button{background:red;color:white}
+    .card{background:#222;padding:15px;margin:10px;border-radius:10px}
+  </style>
 </head>
 <body>
-<header>🚀 YouTube SaaS Dashboard</header>
 
-<nav>
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('channels')">Channels</button>
-<button onclick="showPage('login')">Login</button>
-</nav>
+<h1>YouTube Dashboard</h1>
 
-<div id="login" class="container">
-<h2>Login</h2>
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-<button onclick="login()">Login</button>
-</div>
+<input id="video" placeholder="Video ID">
+<button onclick="addVideo()">Add Video</button>
 
-<div id="dashboard" class="container hidden">
-<h2>Video Dashboard</h2>
-<input id="videoInput" placeholder="Video URL or ID">
-<button onclick="addVideo()">Add</button>
-<div id="videos" class="grid"></div>
+<input id="channel" placeholder="Channel ID">
+<button onclick="addChannel()">Add Channel</button>
+
+<div id="videos"></div>
+<div id="channels"></div>
+
 <canvas id="chart"></canvas>
-</div>
-
-<div id="channels" class="container hidden">
-<h2>Channel Analytics</h2>
-<input id="channelInput" placeholder="Channel ID">
-<button onclick="addChannel()">Add</button>
-<div id="channelList" class="grid"></div>
-</div>
 
 <script>
-// Firebase config (REPLACE)
-const firebaseConfig={apiKey:"8e3bbba873024f6fccd7ae663adf48657280a3f4",authDomain:"",projectId:""};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
+const API_KEY = "AIzaSyAMWMIMz-otNn2qNxma4Aii6A5rqMy2d5o";
 
-const API_KEY="AIzaSyAMWMIMz-otNn2qNxma4Aii6A5rqMy2d5o";
-
-let videos=[];
-let channels=[];
-let history={};
-let chart;
-
-function showPage(page){
-  document.querySelectorAll('.container').forEach(p=>p.classList.add('hidden'));
-  document.getElementById(page).classList.remove('hidden');
-}
-
-function login(){
-  const email=document.getElementById('email').value;
-  const pass=document.getElementById('password').value;
-  auth.signInWithEmailAndPassword(email,pass)
-    .then(()=>alert('Logged in'))
-    .catch(()=>alert('Error'));
-}
-
-function extractId(url){
-  try{
-    const u=new URL(url);
-    return u.searchParams.get('v');
-  }catch{return url}
-}
+let videos=[], channels=[], history={}, chart;
 
 function addVideo(){
-  const id=extractId(document.getElementById('videoInput').value);
-  if(!id||videos.includes(id))return;
+  const id=document.getElementById("video").value;
+  if(!id) return;
   videos.push(id);
   history[id]=[];
 
-  const div=document.createElement('div');
-  div.className='card';
+  const div=document.createElement("div");
+  div.className="card";
   div.id=id;
-  div.innerHTML=`<div class='big'>${id}</div><div class='views'></div>`;
-  document.getElementById('videos').appendChild(div);
+  div.innerHTML=`Video ${id}<br><span class="views"></span>`;
+  document.getElementById("videos").appendChild(div);
 }
 
 function addChannel(){
-  const id=document.getElementById('channelInput').value;
-  if(!id||channels.includes(id))return;
+  const id=document.getElementById("channel").value;
+  if(!id) return;
   channels.push(id);
 
-  const div=document.createElement('div');
-  div.className='card';
-  div.id='ch_'+id;
-  div.innerHTML=`<div class='big'>${id}</div><div class='subs'></div>`;
-  document.getElementById('channelList').appendChild(div);
+  const div=document.createElement("div");
+  div.className="card";
+  div.id="ch_"+id;
+  div.innerHTML=`Channel ${id}<br><span class="subs"></span>`;
+  document.getElementById("channels").appendChild(div);
 }
 
-async function fetchVideos(){
-  if(videos.length===0)return;
-  const res=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videos.join(',')}&key=${API_KEY}`);
-  const data=await res.json();
+async function fetchData(){
+  if(videos.length){
+    const res=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videos.join(",")}&key=${API_KEY}`);
+    const data=await res.json();
 
-  data.items.forEach(v=>{
-    const views=parseInt(v.statistics.viewCount);
-    document.querySelector(`#${v.id} .views`).innerText='Views: '+views;
-    history[v.id].push(views);
-  });
+    data.items.forEach(v=>{
+      const views=v.statistics.viewCount;
+      document.querySelector(`#${v.id} .views`).innerText="Views: "+views;
+      history[v.id].push(views);
+    });
+  }
+
+  if(channels.length){
+    const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channels.join(",")}&key=${API_KEY}`);
+    const data=await res.json();
+
+    data.items.forEach(c=>{
+      document.querySelector(`#ch_${c.id} .subs`).innerText="Subs: "+c.statistics.subscriberCount;
+    });
+  }
+
   updateChart();
 }
 
-async function fetchChannels(){
-  if(channels.length===0)return;
-  const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channels.join(',')}&key=${API_KEY}`);
-  const data=await res.json();
+function updateChart(){
+  if(!videos.length) return;
 
-  data.items.forEach(c=>{
-    document.querySelector(`#ch_${c.id} .subs`).innerText='Subs: '+c.statistics.subscriberCount;
+  const labels=history[videos[0]].map((_,i)=>i);
+  const datasets=videos.map(id=>({label:id,data:history[id]}));
+
+  if(chart) chart.destroy();
+
+  chart=new Chart(document.getElementById("chart"),{
+    type:"line",
+    data:{labels,datasets}
   });
 }
 
-function updateChart(){
-  if(videos.length===0)return;
-  const labels=history[videos[0]].map((_,i)=>i);
-  const datasets=videos.map(id=>({label:id,data:history[id]}));
-  if(chart)chart.destroy();
-  chart=new Chart(document.getElementById('chart'),{type:'line',data:{labels,datasets}});
-}
-
-setInterval(()=>{
-  fetchVideos();
-  fetchChannels();
-},5000);
+setInterval(fetchData,5000);
 </script>
 
 </body>
