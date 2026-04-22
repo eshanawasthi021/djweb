@@ -1,99 +1,739 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>YouTube Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {background:#111;color:#fff;font-family:sans-serif;text-align:center}
-    input,button{padding:10px;margin:5px;border-radius:5px;border:none}
-    button{background:red;color:white}
-    .card{background:#222;padding:15px;margin:10px;border-radius:10px}
-  </style>
+<meta charset="UTF-8">
+<title>KamalFPS — Alert Test Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  /* ===== GLOBAL RESET ===== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: #0A0A0A;
+    color: #F0F0F0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ===== BACKGROUND GRID (tactical feel) ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(232, 0, 29, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 168, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== HEADER ===== */
+  .site-header {
+    position: relative;
+    z-index: 10;
+    padding: 30px 50px;
+    border-bottom: 2px solid #E8001D;
+    background: rgba(10, 10, 10, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 3px;
+  }
+  .logo .red { color: #E8001D; }
+  .logo .white { color: #F0F0F0; }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    background: rgba(232, 0, 29, 0.1);
+    border: 1px solid #E8001D;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 14px;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    background: #E8001D;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+    box-shadow: 0 0 10px #E8001D;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .container {
+    position: relative;
+    z-index: 5;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 30px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  /* ===== PANELS ===== */
+  .panel {
+    background: linear-gradient(135deg, rgba(26,26,26,0.9), rgba(10,10,10,0.9));
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-left: 3px solid #E8001D;
+    padding: 25px;
+    position: relative;
+  }
+
+  .panel-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: #00A8FF;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 168, 255, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-title::before {
+    content: '◈';
+    color: #E8001D;
+  }
+
+  /* ===== FORM INPUTS ===== */
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #00A8FF;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    color: #F0F0F0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #E8001D;
+    box-shadow: 0 0 15px rgba(232, 0, 29, 0.3);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #E8001D, #a00014);
+    border: none;
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(232, 0, 29, 0.5);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn.secondary {
+    background: linear-gradient(135deg, #00A8FF, #0070a8);
+  }
+
+  .btn.secondary:hover {
+    box-shadow: 0 5px 20px rgba(0, 168, 255, 0.5);
+  }
+
+  .btn.tertiary {
+    background: linear-gradient(135deg, #1a1a1a, #0A0A0A);
+    border: 1px solid #F0F0F0;
+  }
+
+  /* ===== PRESET TIPS ===== */
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .preset-btn {
+    padding: 10px;
+    background: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    color: #00A8FF;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .preset-btn:hover {
+    background: rgba(0, 168, 255, 0.2);
+    border-color: #00A8FF;
+    transform: scale(1.05);
+  }
+
+  /* ===== PREVIEW AREA ===== */
+  .preview-panel {
+    grid-column: 1 / -1;
+    min-height: 400px;
+    background: 
+      linear-gradient(135deg, rgba(26,26,26,0.5), rgba(10,10,10,0.5)),
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%231a1a1a"/><circle cx="50" cy="50" r="2" fill="%23E8001D" opacity="0.3"/></svg>');
+    border: 2px dashed rgba(0, 168, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 20px;
+  }
+
+  .preview-empty {
+    text-align: center;
+    color: rgba(240, 240, 240, 0.3);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: #E8001D;
+    text-shadow: 0 0 10px rgba(232, 0, 29, 0.5);
+  }
+
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #00A8FF;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ========================================= */
+  /* ===== ALERT STYLES (from CSS above) ===== */
+  /* ========================================= */
+  .alert-container {
+    position: relative;
+    width: 500px;
+    animation: slideIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+               slideOut 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards 5s;
+  }
+
+  .alert-border-top {
+    height: 4px;
+    background: linear-gradient(90deg, transparent 0%, #E8001D 20%, #E8001D 80%, transparent 100%);
+    box-shadow: 0 0 15px #E8001D, 0 0 25px #E8001D80;
+    animation: pulseBorder 1.5s ease-in-out infinite;
+  }
+
+  .alert-border-bottom {
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #00A8FF 20%, #00A8FF 80%, transparent 100%);
+    box-shadow: 0 0 12px #00A8FF;
+    margin-top: 2px;
+  }
+
+  .alert-main {
+    position: relative;
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
+    border-left: 3px solid #E8001D;
+    border-right: 3px solid #00A8FF;
+    padding: 20px 30px;
+    overflow: hidden;
+    backdrop-filter: blur(5px);
+  }
+
+  .alert-corner {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-color: #E8001D;
+    border-style: solid;
+  }
+
+  .alert-corner.top-left { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+  .alert-corner.top-right { top: 8px; right: 8px; border-width: 2px 2px 0 0; border-color: #00A8FF; }
+  .alert-corner.bottom-left { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; border-color: #00A8FF; }
+  .alert-corner.bottom-right { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+  .alert-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 4px;
+    color: #F0F0F0;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    animation: textFlicker 3s infinite;
+  }
+
+  .header-icon {
+    color: #E8001D;
+    font-size: 14px;
+    animation: iconPulse 1.2s ease-in-out infinite;
+  }
+
+  .header-text { text-shadow: 0 0 10px #E8001D80; }
+
+  .alert-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #E8001D, #00A8FF, transparent);
+    margin: 10px 0 15px 0;
+    animation: scanDivider 2s ease-in-out infinite;
+  }
+
+  .alert-body { text-align: center; padding: 10px 0; }
+
+  .alert-username {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 32px;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #E8001D, 0 0 20px #E8001D80, 2px 2px 0 #0A0A0A;
+    animation: usernameSlide 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.2s backwards;
+  }
+
+  .alert-action {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: #00A8FF;
+    letter-spacing: 3px;
+    margin: 8px 0;
+    text-transform: uppercase;
+    animation: fadeInUp 0.6s ease 0.4s backwards;
+  }
+
+  .alert-amount {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 48px;
+    color: #E8001D;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px #E8001D, 0 0 40px #E8001D60, 0 4px 0 #0A0A0A;
+    animation: amountPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s backwards;
+  }
+
+  .alert-message {
+    margin-top: 12px;
+    padding: 10px 15px;
+    background: rgba(0, 168, 255, 0.08);
+    border-left: 2px solid #00A8FF;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #F0F0F0;
+    text-align: center;
+    font-style: italic;
+    animation: fadeInUp 0.6s ease 0.7s backwards;
+  }
+
+  .alert-message:empty { display: none; }
+
+  .alert-scanline {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 168, 255, 0.15), transparent);
+    animation: scanSweep 2.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes slideIn {
+    0% { opacity: 0; transform: translateX(100%) scale(0.9); }
+    60% { transform: translateX(-20px) scale(1.02); }
+    100% { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  @keyframes slideOut {
+    0% { opacity: 1; transform: translateX(0) scale(1); }
+    100% { opacity: 0; transform: translateX(-100%) scale(0.95); }
+  }
+
+  @keyframes pulseBorder {
+    0%, 100% { box-shadow: 0 0 15px #E8001D, 0 0 25px #E8001D80; }
+    50% { box-shadow: 0 0 25px #E8001D, 0 0 40px #E8001D; }
+  }
+
+  @keyframes iconPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+
+  @keyframes textFlicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.4; }
+    94% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+  }
+
+  @keyframes scanDivider {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes usernameSlide {
+    0% { opacity: 0; transform: translateY(-20px); letter-spacing: 10px; }
+    100% { opacity: 1; transform: translateY(0); letter-spacing: 2px; }
+  }
+
+  @keyframes amountPop {
+    0% { opacity: 0; transform: scale(0.3); }
+    60% { transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scanSweep {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+    border-top: 2px solid #00A8FF;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 3px;
+    color: rgba(240, 240, 240, 0.5);
+    text-transform: uppercase;
+  }
+  .footer span { color: #E8001D; }
+</style>
 </head>
 <body>
 
-<h1>YouTube Dashboard</h1>
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="logo">
+    <span class="white">KAMAL</span><span class="red">FPS</span>
+  </div>
+  <div class="status-pill">
+    <div class="status-dot"></div>
+    <span>Alert Test Lab</span>
+  </div>
+</header>
 
-<input id="video" placeholder="Video ID">
-<button onclick="addVideo()">Add Video</button>
+<!-- ===== MAIN ===== -->
+<div class="container">
 
-<input id="channel" placeholder="Channel ID">
-<button onclick="addChannel()">Add Channel</button>
+  <!-- CONTROL PANEL -->
+  <div class="panel">
+    <div class="panel-title">Alert Controls</div>
 
-<div id="videos"></div>
-<div id="channels"></div>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" value="ProPlayer_99" placeholder="Enter username">
+    </div>
 
-<canvas id="chart"></canvas>
+    <div class="form-group">
+      <label for="amount">Tip Amount</label>
+      <input type="text" id="amount" value="$25.00" placeholder="$0.00">
+    </div>
 
+    <div class="form-group">
+      <label for="message">Message (optional)</label>
+      <textarea id="message" placeholder="Enter a message...">GG man keep grinding! 🔥</textarea>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn" onclick="triggerAlert()">🔥 Trigger Alert</button>
+      <button class="btn secondary" onclick="randomAlert()">🎲 Random</button>
+      <button class="btn tertiary" onclick="clearPreview()">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- PRESETS PANEL -->
+  <div class="panel">
+    <div class="panel-title">Quick Presets</div>
+
+    <label>Tip Amount Presets</label>
+    <div class="preset-grid">
+      <button class="preset-btn" onclick="setAmount('$5.00')">$5</button>
+      <button class="preset-btn" onclick="setAmount('$10.00')">$10</button>
+      <button class="preset-btn" onclick="setAmount('$25.00')">$25</button>
+      <button class="preset-btn" onclick="setAmount('$50.00')">$50</button>
+      <button class="preset-btn" onclick="setAmount('$100.00')">$100</button>
+      <button class="preset-btn" onclick="setAmount('$500.00')">$500</button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value" id="triggerCount">0</div>
+        <div class="stat-label">Alerts Fired</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="totalAmount">$0</div>
+        <div class="stat-label">Total Tested</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">5s</div>
+        <div class="stat-label">Duration</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; padding:15px; background:rgba(232,0,29,0.08); border-left:3px solid #E8001D; font-size:14px; line-height:1.6;">
+      <strong style="color:#E8001D; letter-spacing:2px;">💡 PRO TIP</strong><br>
+      Press <kbd style="background:#1a1a1a; padding:2px 8px; border:1px solid #00A8FF; border-radius:2px;">SPACE</kbd> to trigger a random alert instantly.
+    </div>
+  </div>
+
+  <!-- PREVIEW AREA -->
+  <div class="panel preview-panel" id="previewArea">
+    <div class="preview-empty">◈ Alert will appear here ◈</div>
+  </div>
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  KamalFPS <span>//</span> Alert Testing Lab <span>//</span> @kamalfps
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
 <script>
-const API_KEY = "AIzaSyAMWMIMz-otNn2qNxma4Aii6A5rqMy2d5o";
+  let triggerCount = 0;
+  let totalAmount = 0;
 
-let videos=[], channels=[], history={}, chart;
+  const randomUsernames = [
+    'NightStrike_42', 'ShadowBlade', 'ApexHunter', 'GhostlyAim',
+    'CryoSniper', 'PhantomFPS', 'VenomShot', 'NeonViper',
+    'FrostByte99', 'RapidFire_X', 'CS_Legend', 'ValMain',
+    'HeadshotKing', 'ClutchGod', 'AceDealer'
+  ];
 
-function addVideo(){
-  const id=document.getElementById("video").value;
-  if(!id) return;
-  videos.push(id);
-  history[id]=[];
+  const randomMessages = [
+    'GG man keep grinding! 🔥',
+    'That clutch was insane bro!',
+    'Best FPS streamer fr fr',
+    'Keep the content coming!',
+    'Ranked up because of your tips 💯',
+    'First time tipping lets goooo',
+    'Smoothest aim on twitch',
+    '',
+    'Teach me your ways sensei',
+    'Ace incoming next round!'
+  ];
 
-  const div=document.createElement("div");
-  div.className="card";
-  div.id=id;
-  div.innerHTML=`Video ${id}<br><span class="views"></span>`;
-  document.getElementById("videos").appendChild(div);
-}
+  const randomAmounts = ['$5.00', '$10.00', '$15.00', '$25.00', '$50.00', '$75.00', '$100.00'];
 
-function addChannel(){
-  const id=document.getElementById("channel").value;
-  if(!id) return;
-  channels.push(id);
-
-  const div=document.createElement("div");
-  div.className="card";
-  div.id="ch_"+id;
-  div.innerHTML=`Channel ${id}<br><span class="subs"></span>`;
-  document.getElementById("channels").appendChild(div);
-}
-
-async function fetchData(){
-  if(videos.length){
-    const res=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videos.join(",")}&key=${API_KEY}`);
-    const data=await res.json();
-
-    data.items.forEach(v=>{
-      const views=v.statistics.viewCount;
-      document.querySelector(`#${v.id} .views`).innerText="Views: "+views;
-      history[v.id].push(views);
-    });
+  function setAmount(val) {
+    document.getElementById('amount').value = val;
   }
 
-  if(channels.length){
-    const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channels.join(",")}&key=${API_KEY}`);
-    const data=await res.json();
+  function triggerAlert() {
+    const username = document.getElementById('username').value || 'Anonymous';
+    const amount = document.getElementById('amount').value || '$0.00';
+    const message = document.getElementById('message').value;
 
-    data.items.forEach(c=>{
-      document.querySelector(`#ch_${c.id} .subs`).innerText="Subs: "+c.statistics.subscriberCount;
-    });
+    const previewArea = document.getElementById('previewArea');
+    previewArea.innerHTML = '';
+
+    const alertHTML = `
+      <div class="alert-container">
+        <div class="alert-border-top"></div>
+        <div class="alert-border-bottom"></div>
+        <div class="alert-main">
+          <div class="alert-corner top-left"></div>
+          <div class="alert-corner top-right"></div>
+          <div class="alert-corner bottom-left"></div>
+          <div class="alert-corner bottom-right"></div>
+          <div class="alert-header">
+            <span class="header-icon">◈</span>
+            <span class="header-text">INCOMING SUPPORT</span>
+            <span class="header-icon">◈</span>
+          </div>
+          <div class="alert-divider"></div>
+          <div class="alert-body">
+            <div class="alert-username">${escapeHtml(username)}</div>
+            <div class="alert-action">DROPPED A TIP</div>
+            <div class="alert-amount">${escapeHtml(amount)}</div>
+          </div>
+          ${message ? `<div class="alert-message">"${escapeHtml(message)}"</div>` : ''}
+          <div class="alert-scanline"></div>
+        </div>
+      </div>
+    `;
+
+    previewArea.innerHTML = alertHTML;
+
+    // Update stats
+    triggerCount++;
+    document.getElementById('triggerCount').innerText = triggerCount;
+
+    const numAmount = parseFloat(amount.replace(/[^0-9.]/g, '')) || 0;
+    totalAmount += numAmount;
+    document.getElementById('totalAmount').innerText = '$' + totalAmount.toFixed(0);
+
+    // Play sound
+    playSound();
+
+    // Auto-clear after animation
+    setTimeout(() => {
+      if (previewArea.querySelector('.alert-container')) {
+        previewArea.innerHTML = '<div class="preview-empty">◈ Alert will appear here ◈</div>';
+      }
+    }, 5600);
   }
 
-  updateChart();
-}
+  function randomAlert() {
+    document.getElementById('username').value = randomUsernames[Math.floor(Math.random() * randomUsernames.length)];
+    document.getElementById('amount').value = randomAmounts[Math.floor(Math.random() * randomAmounts.length)];
+    document.getElementById('message').value = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+    triggerAlert();
+  }
 
-function updateChart(){
-  if(!videos.length) return;
+  function clearPreview() {
+    document.getElementById('previewArea').innerHTML = '<div class="preview-empty">◈ Alert will appear here ◈</div>';
+  }
 
-  const labels=history[videos[0]].map((_,i)=>i);
-  const datasets=videos.map(id=>({label:id,data:history[id]}));
+  function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
 
-  if(chart) chart.destroy();
+  // Simple beep sound using Web Audio API
+  function playSound() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // First beep
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.value = 880;
+      gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start();
+      osc1.stop(ctx.currentTime + 0.15);
 
-  chart=new Chart(document.getElementById("chart"),{
-    type:"line",
-    data:{labels,datasets}
+      // Second higher beep
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.value = 1320;
+      gain2.gain.setValueAtTime(0.12, ctx.currentTime + 0.12);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + 0.12);
+      osc2.stop(ctx.currentTime + 0.3);
+    } catch(e) {
+      console.log('Audio not supported');
+    }
+  }
+
+  // Keyboard shortcut - SPACE for random alert
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      randomAlert();
+    }
   });
-}
-
-setInterval(fetchData,5000);
 </script>
 
 </body>
