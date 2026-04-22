@@ -2,15 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>KamalFPS — Alert Test Lab</title>
+<title>KamalFPS — Alert Test Lab PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 <style>
-  /* ===== GLOBAL RESET ===== */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Rajdhani', sans-serif;
@@ -18,15 +13,13 @@
     color: #F0F0F0;
     min-height: 100vh;
     overflow-x: hidden;
-    position: relative;
   }
 
-  /* ===== BACKGROUND GRID (tactical feel) ===== */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: 
+    background-image:
       linear-gradient(rgba(232, 0, 29, 0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0, 168, 255, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
@@ -38,22 +31,33 @@
   .site-header {
     position: relative;
     z-index: 10;
-    padding: 30px 50px;
+    padding: 25px 50px;
     border-bottom: 2px solid #E8001D;
-    background: rgba(10, 10, 10, 0.8);
+    background: rgba(10, 10, 10, 0.9);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
   }
 
   .logo {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 28px;
+    font-size: 26px;
     letter-spacing: 3px;
   }
   .logo .red { color: #E8001D; }
   .logo .white { color: #F0F0F0; }
+  .logo .badge {
+    font-size: 11px;
+    background: #00A8FF;
+    color: #0A0A0A;
+    padding: 2px 8px;
+    margin-left: 8px;
+    letter-spacing: 2px;
+    vertical-align: middle;
+  }
 
   .status-pill {
     display: flex;
@@ -66,7 +70,7 @@
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .status-dot {
@@ -83,20 +87,72 @@
     50% { opacity: 0.3; }
   }
 
-  /* ===== MAIN LAYOUT ===== */
+  /* ===== TABS ===== */
+  .tabs {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    gap: 4px;
+    max-width: 1400px;
+    margin: 20px auto 0;
+    padding: 0 30px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 14px 28px;
+    background: rgba(26, 26, 26, 0.7);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-bottom: none;
+    color: #F0F0F0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  }
+
+  .tab:hover {
+    background: rgba(232, 0, 29, 0.15);
+    color: #E8001D;
+  }
+
+  .tab.active {
+    background: linear-gradient(135deg, #E8001D, #a00014);
+    color: white;
+    border-color: #E8001D;
+  }
+
+  /* ===== CONTAINER ===== */
   .container {
     position: relative;
     z-index: 5;
     max-width: 1400px;
-    margin: 40px auto;
+    margin: 0 auto 40px;
     padding: 0 30px;
-    display: grid;
+  }
+
+  .tab-content {
+    display: none;
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    gap: 25px;
+  }
+
+  .tab-content.active {
+    display: grid;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @media (max-width: 900px) {
-    .container { grid-template-columns: 1fr; }
+    .tab-content.active { grid-template-columns: 1fr; }
   }
 
   /* ===== PANELS ===== */
@@ -123,15 +179,10 @@
     gap: 10px;
   }
 
-  .panel-title::before {
-    content: '◈';
-    color: #E8001D;
-  }
+  .panel-title::before { content: '◈'; color: #E8001D; }
 
-  /* ===== FORM INPUTS ===== */
-  .form-group {
-    margin-bottom: 18px;
-  }
+  /* ===== FORMS ===== */
+  .form-group { margin-bottom: 16px; }
 
   label {
     display: block;
@@ -144,7 +195,7 @@
     margin-bottom: 8px;
   }
 
-  input, textarea {
+  input, textarea, select {
     width: 100%;
     padding: 12px 15px;
     background: rgba(0,0,0,0.5);
@@ -157,71 +208,54 @@
     transition: all 0.3s;
   }
 
-  input:focus, textarea:focus {
+  input:focus, textarea:focus, select:focus {
     border-color: #E8001D;
     box-shadow: 0 0 15px rgba(232, 0, 29, 0.3);
   }
 
-  textarea {
-    resize: vertical;
-    min-height: 80px;
+  textarea { resize: vertical; min-height: 70px; }
+
+  input[type="file"] {
+    padding: 8px;
+    cursor: pointer;
   }
 
   /* ===== BUTTONS ===== */
   .btn-group {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 18px;
   }
 
   .btn {
     flex: 1;
-    min-width: 140px;
-    padding: 14px 20px;
+    min-width: 120px;
+    padding: 13px 18px;
     background: linear-gradient(135deg, #E8001D, #a00014);
     border: none;
     color: white;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: 3px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
     clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
   }
 
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(232, 0, 29, 0.5);
-  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(232, 0, 29, 0.5); }
+  .btn.secondary { background: linear-gradient(135deg, #00A8FF, #0070a8); }
+  .btn.secondary:hover { box-shadow: 0 5px 20px rgba(0, 168, 255, 0.5); }
+  .btn.tertiary { background: linear-gradient(135deg, #1a1a1a, #0A0A0A); border: 1px solid #F0F0F0; }
+  .btn.success { background: linear-gradient(135deg, #00c853, #007a33); }
 
-  .btn:active {
-    transform: translateY(0);
-  }
-
-  .btn.secondary {
-    background: linear-gradient(135deg, #00A8FF, #0070a8);
-  }
-
-  .btn.secondary:hover {
-    box-shadow: 0 5px 20px rgba(0, 168, 255, 0.5);
-  }
-
-  .btn.tertiary {
-    background: linear-gradient(135deg, #1a1a1a, #0A0A0A);
-    border: 1px solid #F0F0F0;
-  }
-
-  /* ===== PRESET TIPS ===== */
   .preset-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 10px;
   }
 
   .preset-btn {
@@ -233,6 +267,7 @@
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 14px;
   }
 
   .preset-btn:hover {
@@ -241,11 +276,11 @@
     transform: scale(1.05);
   }
 
-  /* ===== PREVIEW AREA ===== */
+  /* ===== PREVIEW ===== */
   .preview-panel {
     grid-column: 1 / -1;
-    min-height: 400px;
-    background: 
+    min-height: 350px;
+    background:
       linear-gradient(135deg, rgba(26,26,26,0.5), rgba(10,10,10,0.5)),
       url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%231a1a1a"/><circle cx="50" cy="50" r="2" fill="%23E8001D" opacity="0.3"/></svg>');
     border: 2px dashed rgba(0, 168, 255, 0.3);
@@ -264,51 +299,174 @@
     text-transform: uppercase;
   }
 
-  /* ===== STATS BAR ===== */
+  /* ===== RECORDING INDICATOR ===== */
+  .recording-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #E8001D;
+    color: white;
+    padding: 6px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 13px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    animation: pulse 1s infinite;
+  }
+
+  .recording-badge.active { display: flex; }
+
+  .recording-badge::before {
+    content: '●';
+    animation: blink 0.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 10px #E8001D; }
+    50% { box-shadow: 0 0 25px #E8001D; }
+  }
+
+  /* ===== QUEUE SYSTEM ===== */
+  .queue-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    margin-top: 12px;
+  }
+
+  .queue-list::-webkit-scrollbar { width: 6px; }
+  .queue-list::-webkit-scrollbar-track { background: #0A0A0A; }
+  .queue-list::-webkit-scrollbar-thumb { background: #E8001D; }
+
+  .queue-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: rgba(26, 26, 26, 0.8);
+    border-left: 3px solid #00A8FF;
+    font-size: 14px;
+  }
+
+  .queue-item.tip { border-left-color: #E8001D; }
+  .queue-item.follow { border-left-color: #00A8FF; }
+  .queue-item.sub { border-left-color: #ff00a8; }
+  .queue-item.raid { border-left-color: #ffaa00; }
+
+  .queue-type {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(232, 0, 29, 0.2);
+    color: #E8001D;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .queue-item.follow .queue-type { background: rgba(0, 168, 255, 0.2); color: #00A8FF; }
+  .queue-item.sub .queue-type { background: rgba(255, 0, 168, 0.2); color: #ff00a8; }
+  .queue-item.raid .queue-type { background: rgba(255, 170, 0, 0.2); color: #ffaa00; }
+
+  .queue-info { flex: 1; margin: 0 12px; color: #F0F0F0; }
+  .queue-info strong { color: #FFFFFF; }
+
+  .queue-remove {
+    background: transparent;
+    border: 1px solid #E8001D;
+    color: #E8001D;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 2px;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+
+  .queue-remove:hover { background: #E8001D; color: white; }
+
+  .queue-empty {
+    text-align: center;
+    padding: 30px;
+    color: rgba(240, 240, 240, 0.3);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+
+  /* ===== SOUND UPLOAD ===== */
+  .sound-box {
+    padding: 15px;
+    background: rgba(0, 168, 255, 0.05);
+    border: 1px dashed rgba(0, 168, 255, 0.4);
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .sound-status {
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 2px;
+    font-size: 13px;
+    color: #00A8FF;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .sound-status.loaded { color: #00c853; }
+
+  /* ===== STATS ===== */
   .stats-bar {
     display: flex;
     justify-content: space-around;
-    margin-top: 20px;
+    margin-top: 15px;
     padding: 15px;
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(0, 168, 255, 0.2);
   }
 
-  .stat-item {
-    text-align: center;
-  }
+  .stat-item { text-align: center; }
 
   .stat-value {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 28px;
+    font-size: 24px;
     color: #E8001D;
     text-shadow: 0 0 10px rgba(232, 0, 29, 0.5);
   }
 
   .stat-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 2px;
     color: #00A8FF;
     text-transform: uppercase;
     margin-top: 4px;
   }
 
-  /* ========================================= */
-  /* ===== ALERT STYLES (from CSS above) ===== */
-  /* ========================================= */
+  /* ===== ALERT STYLES ===== */
   .alert-container {
     position: relative;
     width: 500px;
-    animation: slideIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards,
-               slideOut 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards 5s;
+    animation: slideIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+
+  .alert-container.exiting {
+    animation: slideOut 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards;
   }
 
   .alert-border-top {
     height: 4px;
     background: linear-gradient(90deg, transparent 0%, #E8001D 20%, #E8001D 80%, transparent 100%);
-    box-shadow: 0 0 15px #E8001D, 0 0 25px #E8001D80;
+    box-shadow: 0 0 15px #E8001D;
     animation: pulseBorder 1.5s ease-in-out infinite;
   }
 
@@ -319,6 +477,32 @@
     margin-top: 2px;
   }
 
+  /* Alert type color variations */
+  .alert-container.follow .alert-border-top {
+    background: linear-gradient(90deg, transparent 0%, #00A8FF 20%, #00A8FF 80%, transparent 100%);
+    box-shadow: 0 0 15px #00A8FF;
+  }
+  .alert-container.follow .alert-main {
+    border-left-color: #00A8FF;
+    border-right-color: #E8001D;
+  }
+  .alert-container.follow .alert-amount { color: #00A8FF; text-shadow: 0 0 20px #00A8FF, 0 4px 0 #0A0A0A; }
+
+  .alert-container.sub .alert-border-top {
+    background: linear-gradient(90deg, transparent 0%, #ff00a8 20%, #ff00a8 80%, transparent 100%);
+    box-shadow: 0 0 15px #ff00a8;
+  }
+  .alert-container.sub .alert-main { border-left-color: #ff00a8; }
+  .alert-container.sub .alert-username { text-shadow: 0 0 10px #ff00a8, 0 0 20px #ff00a880, 2px 2px 0 #0A0A0A; }
+  .alert-container.sub .alert-amount { color: #ff00a8; text-shadow: 0 0 20px #ff00a8, 0 4px 0 #0A0A0A; }
+
+  .alert-container.raid .alert-border-top {
+    background: linear-gradient(90deg, transparent 0%, #ffaa00 20%, #ffaa00 80%, transparent 100%);
+    box-shadow: 0 0 15px #ffaa00;
+  }
+  .alert-container.raid .alert-main { border-left-color: #ffaa00; }
+  .alert-container.raid .alert-amount { color: #ffaa00; text-shadow: 0 0 20px #ffaa00, 0 4px 0 #0A0A0A; }
+
   .alert-main {
     position: relative;
     background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
@@ -326,7 +510,6 @@
     border-right: 3px solid #00A8FF;
     padding: 20px 30px;
     overflow: hidden;
-    backdrop-filter: blur(5px);
   }
 
   .alert-corner {
@@ -363,13 +546,10 @@
     animation: iconPulse 1.2s ease-in-out infinite;
   }
 
-  .header-text { text-shadow: 0 0 10px #E8001D80; }
-
   .alert-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, #E8001D, #00A8FF, transparent);
     margin: 10px 0 15px 0;
-    animation: scanDivider 2s ease-in-out infinite;
   }
 
   .alert-body { text-align: center; padding: 10px 0; }
@@ -377,7 +557,7 @@
   .alert-username {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 32px;
+    font-size: 30px;
     color: #FFFFFF;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -399,10 +579,10 @@
   .alert-amount {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 48px;
+    font-size: 44px;
     color: #E8001D;
     letter-spacing: 2px;
-    text-shadow: 0 0 20px #E8001D, 0 0 40px #E8001D60, 0 4px 0 #0A0A0A;
+    text-shadow: 0 0 20px #E8001D, 0 4px 0 #0A0A0A;
     animation: amountPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s backwards;
   }
 
@@ -413,7 +593,7 @@
     border-left: 2px solid #00A8FF;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 500;
-    font-size: 16px;
+    font-size: 15px;
     color: #F0F0F0;
     text-align: center;
     font-style: italic;
@@ -445,8 +625,8 @@
   }
 
   @keyframes pulseBorder {
-    0%, 100% { box-shadow: 0 0 15px #E8001D, 0 0 25px #E8001D80; }
-    50% { box-shadow: 0 0 25px #E8001D, 0 0 40px #E8001D; }
+    0%, 100% { box-shadow: 0 0 15px currentColor; }
+    50% { box-shadow: 0 0 25px currentColor; }
   }
 
   @keyframes iconPulse {
@@ -455,17 +635,9 @@
   }
 
   @keyframes textFlicker {
-    0%, 100% { opacity: 1; }
-    92% { opacity: 1; }
+    0%, 92%, 94%, 97% { opacity: 1; }
     93% { opacity: 0.4; }
-    94% { opacity: 1; }
     96% { opacity: 0.6; }
-    97% { opacity: 1; }
-  }
-
-  @keyframes scanDivider {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
   }
 
   @keyframes usernameSlide {
@@ -489,251 +661,794 @@
     100% { left: 200%; }
   }
 
-  /* ===== FOOTER ===== */
+  /* ===== TOAST NOTIFICATIONS ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(10, 10, 10, 0.95);
+    border-left: 3px solid #00A8FF;
+    padding: 15px 25px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 2px;
+    z-index: 1000;
+    animation: toastIn 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 168, 255, 0.3);
+  }
+
+  .toast.success { border-left-color: #00c853; }
+  .toast.error { border-left-color: #E8001D; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
   .footer {
     text-align: center;
-    padding: 30px;
+    padding: 25px;
     margin-top: 40px;
     border-top: 2px solid #00A8FF;
     font-family: 'Barlow Condensed', sans-serif;
     letter-spacing: 3px;
     color: rgba(240, 240, 240, 0.5);
     text-transform: uppercase;
+    font-size: 13px;
   }
   .footer span { color: #E8001D; }
+
+  .info-box {
+    margin-top: 15px;
+    padding: 12px 15px;
+    background: rgba(232,0,29,0.08);
+    border-left: 3px solid #E8001D;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .info-box strong { color: #E8001D; letter-spacing: 2px; }
+  kbd {
+    background: #1a1a1a;
+    padding: 2px 8px;
+    border: 1px solid #00A8FF;
+    font-family: monospace;
+    font-size: 12px;
+  }
 </style>
 </head>
 <body>
 
-<!-- ===== HEADER ===== -->
 <header class="site-header">
   <div class="logo">
     <span class="white">KAMAL</span><span class="red">FPS</span>
+    <span class="badge">PRO</span>
   </div>
   <div class="status-pill">
     <div class="status-dot"></div>
-    <span>Alert Test Lab</span>
+    <span>Alert Test Lab v2.0</span>
   </div>
 </header>
 
-<!-- ===== MAIN ===== -->
+<!-- ===== TABS ===== -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('tip')">💰 Tip</button>
+  <button class="tab" onclick="switchTab('follow')">👁 Follow</button>
+  <button class="tab" onclick="switchTab('sub')">⭐ Sub</button>
+  <button class="tab" onclick="switchTab('raid')">⚔️ Raid</button>
+  <button class="tab" onclick="switchTab('queue')">📋 Queue</button>
+  <button class="tab" onclick="switchTab('settings')">⚙️ Sound/Record</button>
+</div>
+
 <div class="container">
 
-  <!-- CONTROL PANEL -->
-  <div class="panel">
-    <div class="panel-title">Alert Controls</div>
-
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" value="ProPlayer_99" placeholder="Enter username">
-    </div>
-
-    <div class="form-group">
-      <label for="amount">Tip Amount</label>
-      <input type="text" id="amount" value="$25.00" placeholder="$0.00">
-    </div>
-
-    <div class="form-group">
-      <label for="message">Message (optional)</label>
-      <textarea id="message" placeholder="Enter a message...">GG man keep grinding! 🔥</textarea>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn" onclick="triggerAlert()">🔥 Trigger Alert</button>
-      <button class="btn secondary" onclick="randomAlert()">🎲 Random</button>
-      <button class="btn tertiary" onclick="clearPreview()">✕ Clear</button>
-    </div>
-  </div>
-
-  <!-- PRESETS PANEL -->
-  <div class="panel">
-    <div class="panel-title">Quick Presets</div>
-
-    <label>Tip Amount Presets</label>
-    <div class="preset-grid">
-      <button class="preset-btn" onclick="setAmount('$5.00')">$5</button>
-      <button class="preset-btn" onclick="setAmount('$10.00')">$10</button>
-      <button class="preset-btn" onclick="setAmount('$25.00')">$25</button>
-      <button class="preset-btn" onclick="setAmount('$50.00')">$50</button>
-      <button class="preset-btn" onclick="setAmount('$100.00')">$100</button>
-      <button class="preset-btn" onclick="setAmount('$500.00')">$500</button>
-    </div>
-
-    <div class="stats-bar">
-      <div class="stat-item">
-        <div class="stat-value" id="triggerCount">0</div>
-        <div class="stat-label">Alerts Fired</div>
+  <!-- ===== TIP TAB ===== -->
+  <div class="tab-content active" id="tab-tip">
+    <div class="panel">
+      <div class="panel-title">Tip Alert Controls</div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="tip-username" value="ProPlayer_99">
       </div>
-      <div class="stat-item">
-        <div class="stat-value" id="totalAmount">$0</div>
-        <div class="stat-label">Total Tested</div>
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="text" id="tip-amount" value="$25.00">
       </div>
-      <div class="stat-item">
-        <div class="stat-value">5s</div>
-        <div class="stat-label">Duration</div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="tip-message">GG man keep grinding! 🔥</textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="triggerAlert('tip')">🔥 Fire Alert</button>
+        <button class="btn secondary" onclick="randomAlert('tip')">🎲 Random</button>
+        <button class="btn tertiary" onclick="addToQueue('tip')">+ Queue</button>
       </div>
     </div>
 
-    <div style="margin-top:20px; padding:15px; background:rgba(232,0,29,0.08); border-left:3px solid #E8001D; font-size:14px; line-height:1.6;">
-      <strong style="color:#E8001D; letter-spacing:2px;">💡 PRO TIP</strong><br>
-      Press <kbd style="background:#1a1a1a; padding:2px 8px; border:1px solid #00A8FF; border-radius:2px;">SPACE</kbd> to trigger a random alert instantly.
+    <div class="panel">
+      <div class="panel-title">Amount Presets</div>
+      <label>Quick Test</label>
+      <div class="preset-grid">
+        <button class="preset-btn" onclick="setAmount('tip','$5.00')">$5</button>
+        <button class="preset-btn" onclick="setAmount('tip','$10.00')">$10</button>
+        <button class="preset-btn" onclick="setAmount('tip','$25.00')">$25</button>
+        <button class="preset-btn" onclick="setAmount('tip','$50.00')">$50</button>
+        <button class="preset-btn" onclick="setAmount('tip','$100.00')">$100</button>
+        <button class="preset-btn" onclick="setAmount('tip','$500.00')">$500</button>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="stat-tip-count">0</div><div class="stat-label">Alerts</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-tip-total">$0</div><div class="stat-label">Total</div></div>
+      </div>
+      <div class="info-box"><strong>💡 TIP</strong> Press <kbd>SPACE</kbd> for random alert on any tab.</div>
+    </div>
+
+    <div class="panel preview-panel" id="preview-tip">
+      <div class="recording-badge" id="rec-badge-tip">REC</div>
+      <div class="preview-empty">◈ Tip alert will appear here ◈</div>
     </div>
   </div>
 
-  <!-- PREVIEW AREA -->
-  <div class="panel preview-panel" id="previewArea">
-    <div class="preview-empty">◈ Alert will appear here ◈</div>
+  <!-- ===== FOLLOW TAB ===== -->
+  <div class="tab-content" id="tab-follow">
+    <div class="panel">
+      <div class="panel-title">Follower Alert Controls</div>
+      <div class="form-group">
+        <label>New Follower Username</label>
+        <input type="text" id="follow-username" value="NewViewer_42">
+      </div>
+      <div class="form-group">
+        <label>Welcome Message (optional)</label>
+        <textarea id="follow-message">Welcome to the squad! 🎯</textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="triggerAlert('follow')">🔥 Fire Alert</button>
+        <button class="btn secondary" onclick="randomAlert('follow')">🎲 Random</button>
+        <button class="btn tertiary" onclick="addToQueue('follow')">+ Queue</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Follow Info</div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="stat-follow-count">0</div><div class="stat-label">Followers Tested</div></div>
+      </div>
+      <div class="info-box">
+        <strong>◈ FOLLOWER ALERT</strong><br>
+        Smaller, quicker alert. Blue accent theme. Perfect for high-traffic streams where follows come in fast.
+      </div>
+    </div>
+
+    <div class="panel preview-panel" id="preview-follow">
+      <div class="recording-badge" id="rec-badge-follow">REC</div>
+      <div class="preview-empty">◈ Follow alert will appear here ◈</div>
+    </div>
   </div>
 
-</div>
+  <!-- ===== SUB TAB ===== -->
+  <div class="tab-content" id="tab-sub">
+    <div class="panel">
+      <div class="panel-title">Subscriber Alert Controls</div>
+      <div class="form-group">
+        <label>Subscriber Username</label>
+        <input type="text" id="sub-username" value="LoyalFan_X">
+      </div>
+      <div class="form-group">
+        <label>Sub Tier</label>
+        <select id="sub-tier">
+          <option value="Tier 1">Tier 1</option>
+          <option value="Tier 2">Tier 2</option>
+          <option value="Tier 3">Tier 3</option>
+          <option value="Prime">Prime</option>
+          <option value="Gifted">Gifted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Months Subscribed</label>
+        <input type="number" id="sub-months" value="1" min="1">
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="sub-message">Locked in for another month! 💯</textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="triggerAlert('sub')">🔥 Fire Alert</button>
+        <button class="btn secondary" onclick="randomAlert('sub')">🎲 Random</button>
+        <button class="btn tertiary" onclick="addToQueue('sub')">+ Queue</button>
+      </div>
+    </div>
 
-<!-- ===== FOOTER ===== -->
-<div class="footer">
-  KamalFPS <span>//</span> Alert Testing Lab <span>//</span> @kamalfps
-</div>
+    <div class="panel">
+      <div class="panel-title">Sub Info</div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="stat-sub-count">0</div><div class="stat-label">Subs Tested</div></div>
+      </div>
+      <div class="info-box">
+        <strong>⭐ SUBSCRIBER ALERT</strong><br>
+        Pink/magenta accent for subs. Includes tier and month count. More dramatic entrance than follow.
+      </div>
+    </div>
 
-<!-- ===== JAVASCRIPT ===== -->
-<script>
-  let triggerCount = 0;
-  let totalAmount = 0;
+    <div class="panel preview-panel" id="preview-sub">
+      <div class="recording-badge" id="rec-badge-sub">REC</div>
+      <div class="preview-empty">◈ Sub alert will appear here ◈</div>
+    </div>
+  </div>
 
-  const randomUsernames = [
-    'NightStrike_42', 'ShadowBlade', 'ApexHunter', 'GhostlyAim',
-    'CryoSniper', 'PhantomFPS', 'VenomShot', 'NeonViper',
-    'FrostByte99', 'RapidFire_X', 'CS_Legend', 'ValMain',
-    'HeadshotKing', 'ClutchGod', 'AceDealer'
-  ];
+  <!-- ===== RAID TAB ===== -->
+  <div class="tab-content" id="tab-raid">
+    <div class="panel">
+      <div class="panel-title">Raid Alert Controls</div>
+      <div class="form-group">
+        <label>Raider Channel Name</label>
+        <input type="text" id="raid-username" value="BigStreamer">
+      </div>
+      <div class="form-group">
+        <label>Raid Size (viewers)</label>
+        <input type="number" id="raid-viewers" value="150">
+      </div>
+      <div class="form-group">
+        <label>Battle Cry (optional)</label>
+        <textarea id="raid-message">DROP THE HAMMER! ⚔️</textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="triggerAlert('raid')">🔥 Fire Alert</button>
+        <button class="btn secondary" onclick="randomAlert('raid')">🎲 Random</button>
+        <button class="btn tertiary" onclick="addToQueue('raid')">+ Queue</button>
+      </div>
+    </div>
 
-  const randomMessages = [
-    'GG man keep grinding! 🔥',
-    'That clutch was insane bro!',
-    'Best FPS streamer fr fr',
-    'Keep the content coming!',
-    'Ranked up because of your tips 💯',
-    'First time tipping lets goooo',
-    'Smoothest aim on twitch',
-    '',
-    'Teach me your ways sensei',
-    'Ace incoming next round!'
-  ];
+    <div class="panel">
+      <div class="panel-title">Raid Presets</div>
+      <label>Raid Size</label>
+      <div class="preset-grid">
+        <button class="preset-btn" onclick="setRaidSize(10)">10</button>
+        <button class="preset-btn" onclick="setRaidSize(50)">50</button>
+        <button class="preset-btn" onclick="setRaidSize(100)">100</button>
+        <button class="preset-btn" onclick="setRaidSize(250)">250</button>
+        <button class="preset-btn" onclick="setRaidSize(500)">500</button>
+        <button class="preset-btn" onclick="setRaidSize(1000)">1K</button>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="stat-raid-count">0</div><div class="stat-label">Raids Tested</div></div>
+        <div class="stat-item"><div class="stat-value" id="stat-raid-viewers">0</div><div class="stat-label">Total Viewers</div></div>
+      </div>
+      <div class="info-box">
+        <strong>⚔️ RAID ALERT</strong><br>
+        Orange/gold theme. Shows raider name + incoming viewer count. Most dramatic of all alerts.
+      </div>
+    </div>
 
-  const randomAmounts = ['$5.00', '$10.00', '$15.00', '$25.00', '$50.00', '$75.00', '$100.00'];
+    <div class="panel preview-panel" id="preview-raid">
+      <div class="recording-badge" id="rec-badge-raid">REC</div>
+      <div class="preview-empty">◈ Raid alert will appear here ◈</div>
+    </div>
+  </div>
 
-  function setAmount(val) {
-    document.getElementById('amount').value = val;
-  }
+  <!-- ===== QUEUE TAB ===== -->
+  <div class="tab-content" id="tab-queue">
+    <div class="panel">
+      <div class="panel-title">Queue Controls</div>
+      <p style="color: #F0F0F0; margin-bottom: 15px; line-height: 1.6;">
+        Add alerts to the queue from any tab using the <strong style="color:#00A8FF;">+ Queue</strong> button,
+        then play them all in sequence with spacing between each.
+      </p>
 
-  function triggerAlert() {
-    const username = document.getElementById('username').value || 'Anonymous';
-    const amount = document.getElementById('amount').value || '$0.00';
-    const message = document.getElementById('message').value;
+      <div class="form-group">
+        <label>Delay Between Alerts (seconds)</label>
+        <input type="number" id="queue-delay" value="6" min="2" max="30">
+      </div>
 
-    const previewArea = document.getElementById('previewArea');
-    previewArea.innerHTML = '';
+      <div class="btn-group">
+        <button class="btn success" onclick="playQueue()">▶ Play Queue</button>
+        <button class="btn secondary" onclick="shuffleQueue()">🔀 Shuffle</button>
+        <button class="btn tertiary" onclick="clearQueue()">✕ Clear All</button>
+      </div>
 
-    const alertHTML = `
-      <div class="alert-container">
-        <div class="alert-border-top"></div>
-        <div class="alert-border-bottom"></div>
-        <div class="alert-main">
-          <div class="alert-corner top-left"></div>
-          <div class="alert-corner top-right"></div>
-          <div class="alert-corner bottom-left"></div>
-          <div class="alert-corner bottom-right"></div>
-          <div class="alert-header">
-            <span class="header-icon">◈</span>
-            <span class="header-text">INCOMING SUPPORT</span>
-            <span class="header-icon">◈</span>
-          </div>
-          <div class="alert-divider"></div>
-          <div class="alert-body">
-            <div class="alert-username">${escapeHtml(username)}</div>
-            <div class="alert-action">DROPPED A TIP</div>
-            <div class="alert-amount">${escapeHtml(amount)}</div>
-          </div>
-          ${message ? `<div class="alert-message">"${escapeHtml(message)}"</div>` : ''}
-          <div class="alert-scanline"></div>
+      <div class="info-box">
+        <strong>🎯 DEMO MODE</strong><br>
+        Click <kbd>Auto-Fill Demo</kbd> to add one of each alert type for a quick showcase.
+      </div>
+
+      <div class="btn-group" style="margin-top: 10px;">
+        <button class="btn" onclick="autoFillDemo()">Auto-Fill Demo Queue</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Queue List</div>
+      <div class="queue-list" id="queue-list">
+        <div class="queue-empty">Queue is empty — add alerts from other tabs</div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="queue-count">0</div><div class="stat-label">In Queue</div></div>
+        <div class="stat-item"><div class="stat-value" id="queue-playing">Idle</div><div class="stat-label">Status</div></div>
+      </div>
+    </div>
+
+    <div class="panel preview-panel" id="preview-queue">
+      <div class="recording-badge" id="rec-badge-queue">REC</div>
+      <div class="preview-empty">◈ Queue alerts will appear here ◈</div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS TAB ===== -->
+  <div class="tab-content" id="tab-settings">
+    <div class="panel">
+      <div class="panel-title">🔊 Custom Sound Upload</div>
+      <p style="color: #F0F0F0; margin-bottom: 15px; line-height: 1.6;">
+        Upload custom sound files for each alert type. Supports MP3, WAV, OGG.
+      </p>
+
+      <div class="form-group">
+        <label>💰 Tip Alert Sound</label>
+        <input type="file" accept="audio/*" onchange="loadSound('tip', this)">
+        <div class="sound-box">
+          <div class="sound-status" id="sound-status-tip">No custom sound (using default beep)</div>
+          <button class="btn secondary" style="margin-top: 10px;" onclick="previewSound('tip')">▶ Preview</button>
         </div>
       </div>
-    `;
 
-    previewArea.innerHTML = alertHTML;
+      <div class="form-group">
+        <label>👁 Follow Alert Sound</label>
+        <input type="file" accept="audio/*" onchange="loadSound('follow', this)">
+        <div class="sound-box">
+          <div class="sound-status" id="sound-status-follow">No custom sound (using default beep)</div>
+          <button class="btn secondary" style="margin-top: 10px;" onclick="previewSound('follow')">▶ Preview</button>
+        </div>
+      </div>
 
-    // Update stats
-    triggerCount++;
-    document.getElementById('triggerCount').innerText = triggerCount;
+      <div class="form-group">
+        <label>⭐ Sub Alert Sound</label>
+        <input type="file" accept="audio/*" onchange="loadSound('sub', this)">
+        <div class="sound-box">
+          <div class="sound-status" id="sound-status-sub">No custom sound (using default beep)</div>
+          <button class="btn secondary" style="margin-top: 10px;" onclick="previewSound('sub')">▶ Preview</button>
+        </div>
+      </div>
 
-    const numAmount = parseFloat(amount.replace(/[^0-9.]/g, '')) || 0;
-    totalAmount += numAmount;
-    document.getElementById('totalAmount').innerText = '$' + totalAmount.toFixed(0);
+      <div class="form-group">
+        <label>⚔️ Raid Alert Sound</label>
+        <input type="file" accept="audio/*" onchange="loadSound('raid', this)">
+        <div class="sound-box">
+          <div class="sound-status" id="sound-status-raid">No custom sound (using default beep)</div>
+          <button class="btn secondary" style="margin-top: 10px;" onclick="previewSound('raid')">▶ Preview</button>
+        </div>
+      </div>
+    </div>
 
-    // Play sound
-    playSound();
+    <div class="panel">
+      <div class="panel-title">📹 Record & Export</div>
+      <p style="color: #F0F0F0; margin-bottom: 15px; line-height: 1.6;">
+        Record any alert as a <strong style="color:#00A8FF;">.webm video</strong> file. Perfect for sharing on social media or converting to GIF.
+      </p>
 
-    // Auto-clear after animation
+      <div class="form-group">
+        <label>Recording Duration (seconds)</label>
+        <input type="number" id="record-duration" value="6" min="3" max="15">
+      </div>
+
+      <div class="info-box">
+        <strong>📌 HOW IT WORKS</strong><br>
+        1. Click <strong style="color:#00A8FF;">Start Recording</strong> below<br>
+        2. Go to any alert tab<br>
+        3. Fire an alert — it records automatically<br>
+        4. Video downloads when duration ends
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" id="record-btn" onclick="toggleRecording()">🔴 Start Recording</button>
+      </div>
+
+      <div class="info-box" style="margin-top: 20px; background: rgba(0, 168, 255, 0.08); border-left-color: #00A8FF;">
+        <strong style="color:#00A8FF;">🎨 CONVERT TO GIF</strong><br>
+        After downloading .webm, use free tools:<br>
+        • <strong>ezgif.com/video-to-gif</strong> (online)<br>
+        • <strong>CloudConvert.com</strong> (online)<br>
+        • <strong>FFmpeg</strong> (command line)
+      </div>
+    </div>
+
+    <div class="panel" style="grid-column: 1 / -1;">
+      <div class="panel-title">🎛 Global Settings</div>
+      <div class="stats-bar">
+        <div class="stat-item"><div class="stat-value" id="global-alert-count">0</div><div class="stat-label">Total Alerts Fired</div></div>
+        <div class="stat-item"><div class="stat-value" id="global-sounds-loaded">0</div><div class="stat-label">Custom Sounds Loaded</div></div>
+        <div class="stat-item"><div class="stat-value" id="global-recordings">0</div><div class="stat-label">Recordings Made</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  KamalFPS <span>//</span> Alert Test Lab PRO <span>//</span> @kamalfps
+</div>
+
+<script>
+/* ========== GLOBAL STATE ========== */
+let currentTab = 'tip';
+let queue = [];
+let isPlayingQueue = false;
+let customSounds = { tip: null, follow: null, sub: null, raid: null };
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
+let stats = { tip: {count:0, total:0}, follow: {count:0}, sub: {count:0}, raid: {count:0, viewers:0}, global: 0, recordings: 0 };
+
+/* ========== RANDOM DATA ========== */
+const randomUsernames = ['NightStrike_42','ShadowBlade','ApexHunter','GhostlyAim','CryoSniper','PhantomFPS','VenomShot','NeonViper','FrostByte99','RapidFire_X','CS_Legend','ValMain','HeadshotKing','ClutchGod','AceDealer'];
+const tipMessages = ['GG man keep grinding! 🔥','That clutch was insane!','Best FPS streamer fr','Keep the content coming!','Ranked up thanks to you 💯','First time tipping lets goooo','',''];
+const followMessages = ['Welcome to the squad! 🎯','Locked in 🔒','LFG! 🚀','Happy to be here!','',''];
+const subMessages = ['Locked in for another month! 💯','Best streamer no cap','Taking my money 💸','Worth every cent','',''];
+const raidMessages = ['DROP THE HAMMER! ⚔️','GG raid incoming!','ATTACK! 🔥','My army is yours!','',''];
+const tipAmounts = ['$5.00','$10.00','$15.00','$25.00','$50.00','$100.00'];
+
+/* ========== TAB SWITCHING ========== */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+/* ========== ALERT BUILDERS ========== */
+function buildAlertHTML(type, data) {
+  let header = '', body = '', message = data.message || '';
+
+  if (type === 'tip') {
+    header = 'INCOMING SUPPORT';
+    body = `<div class="alert-username">${esc(data.username)}</div>
+            <div class="alert-action">DROPPED A TIP</div>
+            <div class="alert-amount">${esc(data.amount)}</div>`;
+  } else if (type === 'follow') {
+    header = 'NEW FOLLOWER';
+    body = `<div class="alert-username">${esc(data.username)}</div>
+            <div class="alert-action">JOINED THE SQUAD</div>
+            <div class="alert-amount">⚡</div>`;
+  } else if (type === 'sub') {
+    header = 'SUBSCRIBED';
+    const tierLabel = data.months > 1 ? `${data.tier} · ${data.months} MONTHS` : data.tier;
+    body = `<div class="alert-username">${esc(data.username)}</div>
+            <div class="alert-action">${esc(tierLabel)}</div>
+            <div class="alert-amount">★</div>`;
+  } else if (type === 'raid') {
+    header = 'INCOMING RAID';
+    body = `<div class="alert-username">${esc(data.username)}</div>
+            <div class="alert-action">LED AN ARMY OF</div>
+            <div class="alert-amount">${data.viewers}</div>`;
+  }
+
+  return `
+    <div class="alert-container ${type}">
+      <div class="alert-border-top"></div>
+      <div class="alert-border-bottom"></div>
+      <div class="alert-main">
+        <div class="alert-corner top-left"></div>
+        <div class="alert-corner top-right"></div>
+        <div class="alert-corner bottom-left"></div>
+        <div class="alert-corner bottom-right"></div>
+        <div class="alert-header">
+          <span class="header-icon">◈</span>
+          <span class="header-text">${header}</span>
+          <span class="header-icon">◈</span>
+        </div>
+        <div class="alert-divider"></div>
+        <div class="alert-body">${body}</div>
+        ${message ? `<div class="alert-message">"${esc(message)}"</div>` : ''}
+        <div class="alert-scanline"></div>
+      </div>
+    </div>
+  `;
+}
+
+/* ========== TRIGGER ALERT ========== */
+function triggerAlert(type, customData = null, targetPreview = null) {
+  const data = customData || getFormData(type);
+  const previewArea = targetPreview || document.getElementById('preview-' + type);
+  previewArea.innerHTML = '';
+  // preserve REC badge
+  const recBadge = document.createElement('div');
+  recBadge.className = 'recording-badge';
+  recBadge.id = 'rec-badge-' + type;
+  if (isRecording) recBadge.classList.add('active');
+  recBadge.textContent = 'REC';
+  previewArea.appendChild(recBadge);
+
+  const div = document.createElement('div');
+  div.innerHTML = buildAlertHTML(type, data);
+  previewArea.appendChild(div.firstElementChild);
+
+  playSound(type);
+  updateStats(type, data);
+
+  setTimeout(() => {
+    const alertEl = previewArea.querySelector('.alert-container');
+    if (alertEl) alertEl.classList.add('exiting');
     setTimeout(() => {
       if (previewArea.querySelector('.alert-container')) {
-        previewArea.innerHTML = '<div class="preview-empty">◈ Alert will appear here ◈</div>';
+        previewArea.innerHTML = '';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'preview-empty';
+        emptyDiv.textContent = '◈ Alert will appear here ◈';
+        previewArea.appendChild(recBadge);
+        previewArea.appendChild(emptyDiv);
       }
-    }, 5600);
+    }, 500);
+  }, 5000);
+}
+
+function getFormData(type) {
+  if (type === 'tip') return {
+    username: val('tip-username') || 'Anonymous',
+    amount: val('tip-amount') || '$0.00',
+    message: val('tip-message')
+  };
+  if (type === 'follow') return {
+    username: val('follow-username') || 'Anonymous',
+    message: val('follow-message')
+  };
+  if (type === 'sub') return {
+    username: val('sub-username') || 'Anonymous',
+    tier: val('sub-tier') || 'Tier 1',
+    months: parseInt(val('sub-months')) || 1,
+    message: val('sub-message')
+  };
+  if (type === 'raid') return {
+    username: val('raid-username') || 'Anonymous',
+    viewers: parseInt(val('raid-viewers')) || 0,
+    message: val('raid-message')
+  };
+}
+
+function val(id) { return document.getElementById(id).value; }
+function esc(t) { if (!t) return ''; return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+/* ========== RANDOM + PRESETS ========== */
+function randomAlert(type) {
+  const u = randomUsernames[Math.floor(Math.random()*randomUsernames.length)];
+  if (type === 'tip') {
+    document.getElementById('tip-username').value = u;
+    document.getElementById('tip-amount').value = tipAmounts[Math.floor(Math.random()*tipAmounts.length)];
+    document.getElementById('tip-message').value = tipMessages[Math.floor(Math.random()*tipMessages.length)];
+  } else if (type === 'follow') {
+    document.getElementById('follow-username').value = u;
+    document.getElementById('follow-message').value = followMessages[Math.floor(Math.random()*followMessages.length)];
+  } else if (type === 'sub') {
+    document.getElementById('sub-username').value = u;
+    document.getElementById('sub-tier').value = ['Tier 1','Tier 2','Tier 3','Prime','Gifted'][Math.floor(Math.random()*5)];
+    document.getElementById('sub-months').value = Math.floor(Math.random()*24)+1;
+    document.getElementById('sub-message').value = subMessages[Math.floor(Math.random()*subMessages.length)];
+  } else if (type === 'raid') {
+    document.getElementById('raid-username').value = u;
+    document.getElementById('raid-viewers').value = Math.floor(Math.random()*500)+10;
+    document.getElementById('raid-message').value = raidMessages[Math.floor(Math.random()*raidMessages.length)];
+  }
+  triggerAlert(type);
+}
+
+function setAmount(type, amt) { document.getElementById(type+'-amount').value = amt; }
+function setRaidSize(n) { document.getElementById('raid-viewers').value = n; }
+
+/* ========== STATS ========== */
+function updateStats(type, data) {
+  stats.global++;
+  document.getElementById('global-alert-count').innerText = stats.global;
+
+  if (type === 'tip') {
+    stats.tip.count++;
+    const amt = parseFloat((data.amount||'0').replace(/[^0-9.]/g,'')) || 0;
+    stats.tip.total += amt;
+    document.getElementById('stat-tip-count').innerText = stats.tip.count;
+    document.getElementById('stat-tip-total').innerText = '$' + stats.tip.total.toFixed(0);
+  } else if (type === 'follow') {
+    stats.follow.count++;
+    document.getElementById('stat-follow-count').innerText = stats.follow.count;
+  } else if (type === 'sub') {
+    stats.sub.count++;
+    document.getElementById('stat-sub-count').innerText = stats.sub.count;
+  } else if (type === 'raid') {
+    stats.raid.count++;
+    stats.raid.viewers += (parseInt(data.viewers)||0);
+    document.getElementById('stat-raid-count').innerText = stats.raid.count;
+    document.getElementById('stat-raid-viewers').innerText = stats.raid.viewers;
+  }
+}
+
+/* ========== SOUND SYSTEM ========== */
+function loadSound(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  customSounds[type] = new Audio(url);
+  document.getElementById('sound-status-' + type).innerText = '✓ ' + file.name + ' loaded';
+  document.getElementById('sound-status-' + type).classList.add('loaded');
+  const loaded = Object.values(customSounds).filter(s => s !== null).length;
+  document.getElementById('global-sounds-loaded').innerText = loaded;
+  toast('Sound loaded: ' + file.name, 'success');
+}
+
+function previewSound(type) {
+  if (customSounds[type]) {
+    customSounds[type].currentTime = 0;
+    customSounds[type].play();
+  } else {
+    playDefaultBeep(type);
+    toast('Playing default beep (no custom sound loaded)', 'error');
+  }
+}
+
+function playSound(type) {
+  if (customSounds[type]) {
+    customSounds[type].currentTime = 0;
+    customSounds[type].play().catch(()=>{});
+  } else {
+    playDefaultBeep(type);
+  }
+}
+
+function playDefaultBeep(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const freqs = { tip: [880, 1320], follow: [660, 990], sub: [1100, 1650], raid: [440, 660, 880] };
+    const f = freqs[type] || [880, 1320];
+    f.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, ctx.currentTime + i*0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i*0.1 + 0.2);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i*0.1);
+      osc.stop(ctx.currentTime + i*0.1 + 0.2);
+    });
+  } catch(e) {}
+}
+
+/* ========== QUEUE ========== */
+function addToQueue(type) {
+  const data = getFormData(type);
+  queue.push({ type, data });
+  renderQueue();
+  toast(`Added ${type.toUpperCase()} to queue (${queue.length} total)`, 'success');
+}
+
+function renderQueue() {
+  const list = document.getElementById('queue-list');
+  document.getElementById('queue-count').innerText = queue.length;
+  if (queue.length === 0) {
+    list.innerHTML = '<div class="queue-empty">Queue is empty — add alerts from other tabs</div>';
+    return;
+  }
+  list.innerHTML = queue.map((item, i) => {
+    let label = '';
+    if (item.type === 'tip') label = `<strong>${esc(item.data.username)}</strong> — ${esc(item.data.amount)}`;
+    if (item.type === 'follow') label = `<strong>${esc(item.data.username)}</strong> followed`;
+    if (item.type === 'sub') label = `<strong>${esc(item.data.username)}</strong> — ${esc(item.data.tier)} (${item.data.months}mo)`;
+    if (item.type === 'raid') label = `<strong>${esc(item.data.username)}</strong> — ${item.data.viewers} viewers`;
+    return `<div class="queue-item ${item.type}">
+      <span class="queue-type">${item.type}</span>
+      <span class="queue-info">${label}</span>
+      <button class="queue-remove" onclick="removeFromQueue(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function removeFromQueue(i) { queue.splice(i, 1); renderQueue(); }
+function clearQueue() { queue = []; renderQueue(); toast('Queue cleared', 'success'); }
+function shuffleQueue() {
+  for (let i = queue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [queue[i], queue[j]] = [queue[j], queue[i]];
+  }
+  renderQueue();
+  toast('Queue shuffled', 'success');
+}
+
+async function playQueue() {
+  if (isPlayingQueue) { toast('Already playing!', 'error'); return; }
+  if (queue.length === 0) { toast('Queue is empty', 'error'); return; }
+  isPlayingQueue = true;
+  document.getElementById('queue-playing').innerText = 'Playing';
+  const delay = parseInt(val('queue-delay')) * 1000 || 6000;
+  const preview = document.getElementById('preview-queue');
+
+  for (let i = 0; i < queue.length; i++) {
+    const item = queue[i];
+    triggerAlert(item.type, item.data, preview);
+    await sleep(delay);
   }
 
-  function randomAlert() {
-    document.getElementById('username').value = randomUsernames[Math.floor(Math.random() * randomUsernames.length)];
-    document.getElementById('amount').value = randomAmounts[Math.floor(Math.random() * randomAmounts.length)];
-    document.getElementById('message').value = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-    triggerAlert();
-  }
+  isPlayingQueue = false;
+  document.getElementById('queue-playing').innerText = 'Idle';
+  toast('Queue finished!', 'success');
+}
 
-  function clearPreview() {
-    document.getElementById('previewArea').innerHTML = '<div class="preview-empty">◈ Alert will appear here ◈</div>';
-  }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  function escapeHtml(text) {
-    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return text.replace(/[&<>"']/g, m => map[m]);
-  }
+function autoFillDemo() {
+  queue = [
+    { type: 'follow', data: { username: 'NewFan_42', message: 'Hey welcome!' } },
+    { type: 'tip', data: { username: 'Supporter99', amount: '$25.00', message: 'Keep it up!' } },
+    { type: 'sub', data: { username: 'LoyalViewer', tier: 'Tier 2', months: 6, message: 'Love the content' } },
+    { type: 'raid', data: { username: 'BigStreamer', viewers: 247, message: 'ATTACK!' } }
+  ];
+  renderQueue();
+  toast('Demo queue loaded (4 alerts)', 'success');
+}
 
-  // Simple beep sound using Web Audio API
-  function playSound() {
+/* ========== RECORDING ========== */
+async function toggleRecording() {
+  const btn = document.getElementById('record-btn');
+  if (!isRecording) {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // First beep
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.value = 880;
-      gain1.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.start();
-      osc1.stop(ctx.currentTime + 0.15);
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: 30 },
+        audio: true
+      });
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
 
-      // Second higher beep
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.value = 1320;
-      gain2.gain.setValueAtTime(0.12, ctx.currentTime + 0.12);
-      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start(ctx.currentTime + 0.12);
-      osc2.stop(ctx.currentTime + 0.3);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kamalfps-alert-${Date.now()}.webm`;
+        a.click();
+        stream.getTracks().forEach(t => t.stop());
+        stats.recordings++;
+        document.getElementById('global-recordings').innerText = stats.recordings;
+        toast('✅ Recording downloaded!', 'success');
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      btn.textContent = '⏹ Stop Recording';
+      btn.style.background = 'linear-gradient(135deg, #00c853, #007a33)';
+      document.querySelectorAll('.recording-badge').forEach(b => b.classList.add('active'));
+
+      const duration = parseInt(val('record-duration')) * 1000 || 6000;
+      toast(`Recording for ${duration/1000}s... Switch tabs and fire alerts!`, 'success');
+
+      setTimeout(() => { if (isRecording) toggleRecording(); }, duration);
     } catch(e) {
-      console.log('Audio not supported');
+      toast('Recording cancelled or denied', 'error');
     }
+  } else {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    isRecording = false;
+    btn.textContent = '🔴 Start Recording';
+    btn.style.background = '';
+    document.querySelectorAll('.recording-badge').forEach(b => b.classList.remove('active'));
   }
+}
 
-  // Keyboard shortcut - SPACE for random alert
-  document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-      e.preventDefault();
-      randomAlert();
-    }
-  });
+/* ========== TOAST ========== */
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(100%)';
+    el.style.transition = 'all 0.3s';
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
+
+/* ========== KEYBOARD ========== */
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (currentTab === 'queue') playQueue();
+    else if (['tip','follow','sub','raid'].includes(currentTab)) randomAlert(currentTab);
+  }
+});
 </script>
 
 </body>
