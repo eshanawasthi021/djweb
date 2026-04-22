@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KamalFPS Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Orbitron:wght@700;900&family=Poppins:wght@400;600;700&family=Roboto:wght@400;500;700&family=Bebas+Neue&family=Russo+One&family=Oswald:wght@400;600;700&family=Montserrat:wght@400;600;700;900&family=Anton&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: transparent !important;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  /* POSITIONS */
+  #alert-stage {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+  }
+  #alert-stage.top-left { align-items: flex-start; justify-content: flex-start; padding: 40px; }
+  #alert-stage.top-center { align-items: flex-start; justify-content: center; padding: 40px; }
+  #alert-stage.top-right { align-items: flex-start; justify-content: flex-end; padding: 40px; }
+  #alert-stage.middle-left { align-items: center; justify-content: flex-start; padding: 40px; }
+  #alert-stage.middle-center { align-items: center; justify-content: center; }
+  #alert-stage.middle-right { align-items: center; justify-content: flex-end; padding: 40px; }
+  #alert-stage.bottom-left { align-items: flex-end; justify-content: flex-start; padding: 40px; }
+  #alert-stage.bottom-center { align-items: flex-end; justify-content: center; padding: 40px; }
+  #alert-stage.bottom-right { align-items: flex-end; justify-content: flex-end; padding: 40px; }
+
+  .alert-container {
+    position: relative;
+    display: inline-block;
+    opacity: 0;
+  }
+  .alert-container.active {
+    animation-fill-mode: forwards;
+  }
+
+  .alert-border-top, .alert-border-bottom {
+    height: var(--border-size, 4px);
+  }
+  .alert-border-top {
+    background: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+    display: var(--show-borders, block);
+  }
+  .alert-border-bottom {
+    background: var(--accent-color);
+    box-shadow: 0 0 12px var(--accent-color);
+    margin-top: 2px;
+    display: var(--show-borders, block);
+  }
+
+  .alert-main {
+    position: relative;
+    background: var(--bg-gradient);
+    border-left: 3px solid var(--primary-color);
+    border-right: 3px solid var(--accent-color);
+    padding: 20px 30px;
+    overflow: hidden;
+    border-radius: var(--radius, 0);
+  }
+
+  .alert-corner {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-style: solid;
+    display: var(--show-corners, block);
+  }
+  .alert-corner.top-left { top: 8px; left: 8px; border-width: 2px 0 0 2px; border-color: var(--primary-color); }
+  .alert-corner.top-right { top: 8px; right: 8px; border-width: 2px 2px 0 0; border-color: var(--accent-color); }
+  .alert-corner.bottom-left { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; border-color: var(--accent-color); }
+  .alert-corner.bottom-right { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; border-color: var(--primary-color); }
+
+  .alert-header {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    font-family: var(--header-font);
+    font-weight: 700;
+    font-size: var(--header-size);
+    letter-spacing: 4px;
+    color: var(--header-color);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .alert-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), var(--accent-color), transparent);
+    margin: 10px 0 15px 0;
+    display: var(--show-divider, block);
+  }
+
+  .alert-body { text-align: center; padding: 10px 0; }
+
+  .alert-username {
+    font-family: var(--name-font);
+    font-weight: 900;
+    font-size: var(--name-size);
+    color: var(--name-color);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--name-shadow);
+  }
+
+  .alert-action {
+    font-family: var(--action-font);
+    font-weight: 600;
+    font-size: var(--action-size);
+    color: var(--action-color);
+    letter-spacing: 3px;
+    margin: 8px 0;
+    text-transform: uppercase;
+  }
+
+  .alert-amount {
+    font-family: var(--amount-font);
+    font-weight: 900;
+    font-size: var(--amount-size);
+    color: var(--amount-color);
+    letter-spacing: 2px;
+    text-shadow: var(--amount-shadow);
+  }
+
+  .alert-message {
+    margin-top: 12px;
+    padding: 10px 15px;
+    background: rgba(0, 168, 255, 0.08);
+    border-left: 2px solid var(--accent-color);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: #F0F0F0;
+    text-align: center;
+    font-style: italic;
+  }
+  .alert-message:empty { display: none; }
+
+  /* ANIMATIONS */
+  @keyframes slideRight { 0% { opacity: 0; transform: translateX(100%); } 100% { opacity: 1; transform: translateX(0); } }
+  @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-100%); } 100% { opacity: 1; transform: translateX(0); } }
+  @keyframes slideUp { 0% { opacity: 0; transform: translateY(50px); } 100% { opacity: 1; transform: translateY(0); } }
+  @keyframes slideDown { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
+  @keyframes zoomIn { 0% { opacity: 0; transform: scale(0.3); } 60% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes flipIn { 0% { opacity: 0; transform: rotateY(90deg); } 100% { opacity: 1; transform: rotateY(0); } }
+  @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.5); } 50% { transform: scale(1.15); } 70% { transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes fadeOutLeft { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(-100%); } }
+  @keyframes fadeOutRight { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(100%); } }
+  @keyframes fadeOutDown { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
+  @keyframes fadeOutUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+  @keyframes zoomOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.3); } }
+</style>
+</head>
+<body>
+
+<div id="alert-stage" class="middle-center"></div>
+
+<script>
+/* ==================== CONFIG FROM URL ==================== */
+let configs = {};
+let streamerId = '';
+
+function loadConfigFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('c');
+  if (!encoded) {
+    console.error('No config in URL');
+    return;
+  }
+  try {
+    const decoded = JSON.parse(decodeURIComponent(atob(encoded)));
+    configs = decoded.configs;
+    streamerId = decoded.sid;
+    console.log('Loaded config for streamer:', streamerId);
+  } catch(e) {
+    console.error('Invalid config:', e);
+  }
+}
+loadConfigFromUrl();
+
+/* ==================== SHOW ALERT ==================== */
+function showAlert(type, data) {
+  const cfg = configs[type];
+  if (!cfg) { console.warn('No config for:', type); return; }
+
+  const stage = document.getElementById('alert-stage');
+  stage.className = cfg.position;
+
+  const bgColor1Rgb = hexToRgba(cfg.bgColor1, cfg.bgOpacity / 100);
+  const bgColor2Rgb = hexToRgba(cfg.bgColor2, cfg.bgOpacity / 100);
+  let bgGradient = bgColor1Rgb;
+  if (cfg.bgType === 'gradient') bgGradient = `linear-gradient(135deg, ${bgColor1Rgb} 0%, ${bgColor2Rgb} 100%)`;
+  if (cfg.bgType === 'transparent') bgGradient = 'transparent';
+
+  const nameShadow = cfg.nameGlow
+    ? `0 0 10px ${cfg.primaryColor}, 0 0 20px ${cfg.primaryColor}80, 2px 2px 0 #0A0A0A`
+    : '2px 2px 0 #0A0A0A';
+  const amountShadow = `0 0 20px ${cfg.amountColor}, 0 4px 0 #0A0A0A`;
+
+  const html = `
+    <div class="alert-container active" style="
+      --primary-color: ${cfg.primaryColor};
+      --accent-color: ${cfg.accentColor};
+      --bg-gradient: ${bgGradient};
+      --header-font: '${cfg.headerFont}', sans-serif;
+      --header-size: ${cfg.headerSize}px;
+      --header-color: ${cfg.headerColor};
+      --name-font: '${cfg.nameFont}', sans-serif;
+      --name-size: ${cfg.nameSize}px;
+      --name-color: ${cfg.nameColor};
+      --name-shadow: ${nameShadow};
+      --action-font: '${cfg.actionFont}', sans-serif;
+      --action-size: ${cfg.actionSize}px;
+      --action-color: ${cfg.actionColor};
+      --amount-font: '${cfg.amountFont}', sans-serif;
+      --amount-size: ${cfg.amountSize}px;
+      --amount-color: ${cfg.amountColor};
+      --amount-shadow: ${amountShadow};
+      --radius: ${cfg.radius}px;
+      --border-size: ${cfg.borderSize}px;
+      --show-borders: ${cfg.showBorders ? 'block' : 'none'};
+      --show-corners: ${cfg.showCorners ? 'block' : 'none'};
+      --show-divider: ${cfg.showDivider ? 'block' : 'none'};
+      width: ${cfg.width}px;
+      animation: ${cfg.animIn} 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+                 ${cfg.animOut} 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards ${cfg.duration}s;
+    ">
+      <div class="alert-border-top"></div>
+      <div class="alert-main">
+        <div class="alert-corner top-left"></div>
+        <div class="alert-corner top-right"></div>
+        <div class="alert-corner bottom-left"></div>
+        <div class="alert-corner bottom-right"></div>
+        <div class="alert-header">
+          <span>◈</span>
+          <span>${esc(cfg.headerText)}</span>
+          <span>◈</span>
+        </div>
+        <div class="alert-divider"></div>
+        <div class="alert-body">
+          <div class="alert-username">${esc(data.username)}</div>
+          <div class="alert-action">${esc(cfg.actionText)}</div>
+          <div class="alert-amount">${esc(data.amount || '')}</div>
+        </div>
+        ${data.message ? `<div class="alert-message">"${esc(data.message)}"</div>` : ''}
+      </div>
+      <div class="alert-border-bottom"></div>
+    </div>
+  `;
+
+  stage.innerHTML = html;
+
+  // Play sound
+  if (cfg.soundUrl) {
+    const audio = new Audio(cfg.soundUrl);
+    audio.volume = (cfg.volume || 70) / 100;
+    audio.play().catch(()=>{});
+  } else {
+    playDefaultBeep(type);
+  }
+
+  // Clear after animation
+  setTimeout(() => { stage.innerHTML = ''; }, (cfg.duration + 0.6) * 1000);
+}
+
+function esc(t) { if (!t) return ''; return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+function hexToRgba(hex, alpha) {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0,2), 16);
+  const g = parseInt(hex.substring(2,4), 16);
+  const b = parseInt(hex.substring(4,6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function playDefaultBeep(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const freqs = { tip: [880, 1320], follow: [660, 990], sub: [1100, 1650], raid: [440, 660, 880], cheer: [1500, 2000] };
+    const f = freqs[type] || [880, 1320];
+    f.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, ctx.currentTime + i*0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i*0.1 + 0.2);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i*0.1);
+      osc.stop(ctx.currentTime + i*0.1 + 0.2);
+    });
+  } catch(e) {}
+}
+
+/* ==================== DEMO MODE ==================== */
+// Remove or replace with real WebSocket/SSE connection
+
+// Test immediately with demo alert
+setTimeout(() => {
+  showAlert('tip', { username: 'TestUser', amount: '$25.00', message: 'Testing the overlay!' });
+}, 1000);
+
+/* ==================== CONNECT TO BACKEND ==================== */
+/*
+  In production, replace demo mode with WebSocket connection:
+  
+  const ws = new WebSocket('wss://yourapi.com/alerts/' + streamerId);
+  ws.onmessage = (event) => {
+    const alert = JSON.parse(event.data);
+    showAlert(alert.type, alert.data);
+  };
+*/
+
+// Expose for external triggers (testing)
+window.triggerAlert = showAlert;
+</script>
+
+</body>
+</html>
