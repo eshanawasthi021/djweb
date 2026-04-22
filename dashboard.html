@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KamalFPS — Streamer Alert Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Orbitron:wght@700;900&family=Poppins:wght@400;600;700&family=Roboto:wght@400;500;700&family=Bebas+Neue&family=Russo+One&family=Oswald:wght@400;600;700&family=Montserrat:wght@400;600;700;900&family=Anton&family=Teko:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark: #0A0A0A;
+    --bg-panel: #1A1A1A;
+    --accent-red: #E8001D;
+    --accent-blue: #00A8FF;
+    --text: #F0F0F0;
+    --border: rgba(0, 168, 255, 0.2);
+  }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232, 0, 29, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 168, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== HEADER ===== */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 18px 40px;
+    border-bottom: 2px solid var(--accent-red);
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 3px;
+  }
+  .logo .red { color: var(--accent-red); }
+  .logo .badge {
+    font-size: 10px;
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    padding: 2px 8px;
+    margin-left: 8px;
+    letter-spacing: 2px;
+    vertical-align: middle;
+  }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--accent-red), #a00014);
+    border: none;
+    color: white;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(232, 0, 29, 0.5); }
+  .btn.secondary { background: linear-gradient(135deg, var(--accent-blue), #0070a8); }
+  .btn.secondary:hover { box-shadow: 0 5px 20px rgba(0, 168, 255, 0.5); }
+  .btn.success { background: linear-gradient(135deg, #00c853, #007a33); }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); }
+
+  /* ===== MAIN LAYOUT ===== */
+  .dashboard {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 300px 1fr 380px;
+    gap: 0;
+    height: calc(100vh - 70px);
+  }
+
+  @media (max-width: 1200px) {
+    .dashboard { grid-template-columns: 260px 1fr 320px; }
+  }
+  @media (max-width: 900px) {
+    .dashboard { grid-template-columns: 1fr; height: auto; }
+  }
+
+  /* ===== SIDEBAR (Alert Types) ===== */
+  .sidebar {
+    background: rgba(26, 26, 26, 0.6);
+    border-right: 1px solid var(--border);
+    padding: 25px 20px;
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .alert-type-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid transparent;
+    border-left: 3px solid transparent;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .alert-type-btn:hover { background: rgba(232, 0, 29, 0.1); }
+  .alert-type-btn.active {
+    background: rgba(232, 0, 29, 0.15);
+    border-left-color: var(--accent-red);
+    border-color: rgba(232, 0, 29, 0.3);
+  }
+  .alert-type-btn .icon { font-size: 22px; }
+  .alert-type-btn .label { flex: 1; letter-spacing: 1px; }
+  .alert-type-btn .check {
+    width: 18px; height: 18px;
+    border: 2px solid var(--accent-blue);
+    border-radius: 50%;
+    display: none;
+  }
+  .alert-type-btn.enabled .check {
+    display: block;
+    background: var(--accent-blue);
+    box-shadow: 0 0 10px var(--accent-blue);
+  }
+
+  .preset-section { margin-top: 30px; }
+
+  .preset-item {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: rgba(0, 168, 255, 0.05);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .preset-item:hover { background: rgba(0, 168, 255, 0.15); }
+  .preset-item .name { color: var(--accent-blue); font-weight: 600; letter-spacing: 1px; }
+
+  /* ===== PREVIEW AREA (Center) ===== */
+  .preview-area {
+    position: relative;
+    padding: 30px;
+    background:
+      linear-gradient(135deg, rgba(26,26,26,0.3), rgba(10,10,10,0.5)),
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="%230A0A0A"/><circle cx="20" cy="20" r="1" fill="%23E8001D" opacity="0.3"/></svg>');
+    overflow-y: auto;
+  }
+
+  .preview-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .preview-stage {
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    border: 2px dashed rgba(0, 168, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+
+  .stage-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(0, 168, 255, 0.4);
+    text-transform: uppercase;
+  }
+
+  .test-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ===== CUSTOMIZATION PANEL (Right) ===== */
+  .customize-panel {
+    background: rgba(26, 26, 26, 0.6);
+    border-left: 1px solid var(--border);
+    padding: 25px 20px;
+    overflow-y: auto;
+  }
+
+  .section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 168, 255, 0.1);
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before { content: '◈'; color: var(--accent-red); }
+
+  .form-row { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: rgba(240, 240, 240, 0.7);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%;
+    padding: 9px 12px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 10px rgba(232, 0, 29, 0.3);
+  }
+
+  input[type="color"] {
+    width: 45px;
+    height: 36px;
+    padding: 2px;
+    background: transparent;
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    cursor: pointer;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.5);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-red);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-red);
+  }
+
+  .color-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .color-row input[type="color"] { flex: 0 0 45px; }
+  .color-row input[type="text"] { flex: 1; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .range-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .range-row input[type="range"] { flex: 1; }
+  .range-value {
+    min-width: 50px;
+    text-align: right;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: var(--accent-blue);
+  }
+
+  .switch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+  }
+
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 22px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #666;
+    transition: all 0.2s;
+  }
+  .switch.on { background: rgba(232, 0, 29, 0.3); border-color: var(--accent-red); }
+  .switch.on::after { left: 24px; background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+
+  .anim-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .anim-btn {
+    padding: 8px;
+    background: rgba(0, 168, 255, 0.08);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    color: var(--accent-blue);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .anim-btn:hover { background: rgba(0, 168, 255, 0.2); }
+  .anim-btn.active { background: var(--accent-red); border-color: var(--accent-red); color: white; }
+
+  .position-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    background: rgba(0,0,0,0.4);
+    padding: 8px;
+    max-width: 150px;
+  }
+  .pos-btn {
+    aspect-ratio: 1;
+    background: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pos-btn:hover { background: rgba(0, 168, 255, 0.3); }
+  .pos-btn.active { background: var(--accent-red); }
+
+  .gradient-box {
+    height: 40px;
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  /* ===== LINK MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+  }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.3s; }
+
+  .modal {
+    background: linear-gradient(135deg, #1a1a1a, #0A0A0A);
+    border: 2px solid var(--accent-red);
+    max-width: 600px;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+  }
+
+  .modal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .url-box {
+    padding: 15px;
+    background: rgba(0, 168, 255, 0.08);
+    border: 1px solid var(--accent-blue);
+    border-left: 3px solid var(--accent-blue);
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--accent-blue);
+    margin: 15px 0;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .step {
+    padding: 15px;
+    background: rgba(0,0,0,0.4);
+    border-left: 3px solid var(--accent-blue);
+    margin-bottom: 10px;
+  }
+  .step-num {
+    display: inline-block;
+    background: var(--accent-red);
+    color: white;
+    padding: 2px 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    margin-right: 10px;
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(10,10,10,0.95);
+    border-left: 3px solid var(--accent-blue);
+    padding: 15px 25px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 2px;
+    z-index: 1000;
+    animation: toastIn 0.3s;
+    box-shadow: 0 10px 30px rgba(0, 168, 255, 0.3);
+  }
+  .toast.success { border-left-color: #00c853; }
+  .toast.error { border-left-color: var(--accent-red); }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+
+  /* ============================== */
+  /* ===== ALERT DYNAMIC STYLES ===== */
+  /* ============================== */
+  .alert-container {
+    position: relative;
+    display: inline-block;
+    transform-origin: center;
+  }
+  .alert-container.active {
+    animation: var(--anim-in) 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+               var(--anim-out) 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards 5s;
+  }
+
+  .alert-border-top, .alert-border-bottom {
+    height: var(--border-size, 4px);
+    transition: all 0.3s;
+  }
+  .alert-border-top {
+    background: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+    display: var(--show-borders, block);
+  }
+  .alert-border-bottom {
+    background: var(--accent-color);
+    box-shadow: 0 0 12px var(--accent-color);
+    margin-top: 2px;
+    display: var(--show-borders, block);
+  }
+
+  .alert-main {
+    position: relative;
+    background: var(--bg-gradient);
+    border-left: 3px solid var(--primary-color);
+    border-right: 3px solid var(--accent-color);
+    padding: var(--padding, 20px 30px);
+    overflow: hidden;
+    border-radius: var(--radius, 0);
+  }
+
+  .alert-corner {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-style: solid;
+    display: var(--show-corners, block);
+  }
+  .alert-corner.top-left { top: 8px; left: 8px; border-width: 2px 0 0 2px; border-color: var(--primary-color); }
+  .alert-corner.top-right { top: 8px; right: 8px; border-width: 2px 2px 0 0; border-color: var(--accent-color); }
+  .alert-corner.bottom-left { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; border-color: var(--accent-color); }
+  .alert-corner.bottom-right { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; border-color: var(--primary-color); }
+
+  .alert-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: var(--header-font);
+    font-weight: 700;
+    font-size: var(--header-size, 18px);
+    letter-spacing: 4px;
+    color: var(--header-color);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .alert-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), var(--accent-color), transparent);
+    margin: 10px 0 15px 0;
+    display: var(--show-divider, block);
+  }
+
+  .alert-body { text-align: center; padding: 10px 0; }
+
+  .alert-username {
+    font-family: var(--name-font);
+    font-weight: 900;
+    font-size: var(--name-size, 30px);
+    color: var(--name-color);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--name-shadow);
+  }
+
+  .alert-action {
+    font-family: var(--action-font);
+    font-weight: 600;
+    font-size: var(--action-size, 16px);
+    color: var(--action-color);
+    letter-spacing: 3px;
+    margin: 8px 0;
+    text-transform: uppercase;
+  }
+
+  .alert-amount {
+    font-family: var(--amount-font);
+    font-weight: 900;
+    font-size: var(--amount-size, 44px);
+    color: var(--amount-color);
+    letter-spacing: 2px;
+    text-shadow: var(--amount-shadow);
+  }
+
+  .alert-message {
+    margin-top: 12px;
+    padding: 10px 15px;
+    background: rgba(0, 168, 255, 0.08);
+    border-left: 2px solid var(--accent-color);
+    font-family: var(--msg-font);
+    font-weight: 500;
+    font-size: var(--msg-size, 15px);
+    color: var(--msg-color);
+    text-align: center;
+    font-style: italic;
+  }
+  .alert-message:empty { display: none; }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes slideRight {
+    0% { opacity: 0; transform: translateX(100%); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideLeft {
+    0% { opacity: 0; transform: translateX(-100%); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideUp {
+    0% { opacity: 0; transform: translateY(50px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideDown {
+    0% { opacity: 0; transform: translateY(-50px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes zoomIn {
+    0% { opacity: 0; transform: scale(0.3); }
+    60% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes flipIn {
+    0% { opacity: 0; transform: rotateY(90deg); }
+    100% { opacity: 1; transform: rotateY(0); }
+  }
+  @keyframes bounceIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { transform: scale(1.15); }
+    70% { transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes fadeOutLeft {
+    0% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(-100%); }
+  }
+  @keyframes fadeOutRight {
+    0% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(100%); }
+  }
+  @keyframes fadeOutDown {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(50px); }
+  }
+  @keyframes fadeOutUp {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-50px); }
+  }
+  @keyframes zoomOut {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.3); }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">
+    <span>KAMAL</span><span class="red">FPS</span>
+    <span class="badge">STUDIO</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn ghost" onclick="loadConfig()">📂 Load</button>
+    <button class="btn secondary" onclick="saveConfig()">💾 Save</button>
+    <button class="btn" onclick="generateLink()">🔗 Generate OBS Link</button>
+  </div>
+</header>
+
+<div class="dashboard">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Alert Types</div>
+
+    <button class="alert-type-btn active enabled" data-type="tip" onclick="selectAlertType('tip')">
+      <span class="icon">💰</span>
+      <span class="label">Tip</span>
+      <span class="check"></span>
+    </button>
+    <button class="alert-type-btn enabled" data-type="follow" onclick="selectAlertType('follow')">
+      <span class="icon">👁</span>
+      <span class="label">Follow</span>
+      <span class="check"></span>
+    </button>
+    <button class="alert-type-btn enabled" data-type="sub" onclick="selectAlertType('sub')">
+      <span class="icon">⭐</span>
+      <span class="label">Subscribe</span>
+      <span class="check"></span>
+    </button>
+    <button class="alert-type-btn enabled" data-type="raid" onclick="selectAlertType('raid')">
+      <span class="icon">⚔️</span>
+      <span class="label">Raid</span>
+      <span class="check"></span>
+    </button>
+    <button class="alert-type-btn enabled" data-type="cheer" onclick="selectAlertType('cheer')">
+      <span class="icon">💎</span>
+      <span class="label">Cheer/Bits</span>
+      <span class="check"></span>
+    </button>
+
+    <div class="preset-section">
+      <div class="sidebar-title">Style Presets</div>
+      <div class="preset-item" onclick="applyPreset('neon')">
+        <span class="name">Neon FPS</span>
+        <span>🎮</span>
+      </div>
+      <div class="preset-item" onclick="applyPreset('minimal')">
+        <span class="name">Minimal</span>
+        <span>✨</span>
+      </div>
+      <div class="preset-item" onclick="applyPreset('cyberpunk')">
+        <span class="name">Cyberpunk</span>
+        <span>🌆</span>
+      </div>
+      <div class="preset-item" onclick="applyPreset('retro')">
+        <span class="name">Retro Wave</span>
+        <span>📼</span>
+      </div>
+      <div class="preset-item" onclick="applyPreset('nature')">
+        <span class="name">Forest</span>
+        <span>🌲</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== PREVIEW AREA ===== -->
+  <main class="preview-area">
+    <div class="preview-title">
+      <span>◈ Live Preview <span id="current-type-label">(Tip Alert)</span></span>
+      <span style="color: #00A8FF;" id="preview-size">500px wide</span>
+    </div>
+    <div class="preview-stage">
+      <div class="stage-label">◈ OBS BROWSER SOURCE PREVIEW</div>
+      <div id="alert-preview"></div>
+    </div>
+
+    <div class="test-bar">
+      <button class="btn" onclick="testAlert()">▶ Test Alert</button>
+      <button class="btn secondary" onclick="testRandom()">🎲 Random Data</button>
+      <button class="btn ghost" onclick="resetDefaults()">↺ Reset Defaults</button>
+    </div>
+  </main>
+
+  <!-- ===== CUSTOMIZE PANEL ===== -->
+  <aside class="customize-panel">
+
+    <!-- COLORS -->
+    <div class="section">
+      <div class="section-title">Colors</div>
+
+      <div class="form-row">
+        <label>Primary Color</label>
+        <div class="color-row">
+          <input type="color" id="primaryColor" value="#E8001D" oninput="updatePreview()">
+          <input type="text" id="primaryColorHex" value="#E8001D" oninput="syncColor('primary'); updatePreview()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Accent Color</label>
+        <div class="color-row">
+          <input type="color" id="accentColor" value="#00A8FF" oninput="updatePreview()">
+          <input type="text" id="accentColorHex" value="#00A8FF" oninput="syncColor('accent'); updatePreview()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Background Type</label>
+        <select id="bgType" onchange="updatePreview()">
+          <option value="solid">Solid</option>
+          <option value="gradient" selected>Gradient</option>
+          <option value="transparent">Transparent</option>
+        </select>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-row">
+          <label>BG Color 1</label>
+          <input type="color" id="bgColor1" value="#0A0A0A" oninput="updatePreview()" style="width:100%;">
+        </div>
+        <div class="form-row">
+          <label>BG Color 2</label>
+          <input type="color" id="bgColor2" value="#1A1A1A" oninput="updatePreview()" style="width:100%;">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Background Opacity</label>
+        <div class="range-row">
+          <input type="range" id="bgOpacity" min="0" max="100" value="95" oninput="updatePreview()">
+          <span class="range-value" id="bgOpacity-val">95%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEXT & FONTS -->
+    <div class="section">
+      <div class="section-title">Header Text</div>
+      <div class="form-row">
+        <label>Header Label</label>
+        <input type="text" id="headerText" value="INCOMING SUPPORT" oninput="updatePreview()">
+      </div>
+      <div class="form-row">
+        <label>Header Font</label>
+        <select id="headerFont" onchange="updatePreview()">
+          <option value="Barlow Condensed">Barlow Condensed</option>
+          <option value="Rajdhani">Rajdhani</option>
+          <option value="Orbitron">Orbitron</option>
+          <option value="Bebas Neue">Bebas Neue</option>
+          <option value="Russo One">Russo One</option>
+          <option value="Oswald">Oswald</option>
+          <option value="Montserrat">Montserrat</option>
+          <option value="Anton">Anton</option>
+          <option value="Teko">Teko</option>
+          <option value="Poppins">Poppins</option>
+          <option value="Roboto">Roboto</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Header Size</label>
+        <div class="range-row">
+          <input type="range" id="headerSize" min="10" max="36" value="18" oninput="updatePreview()">
+          <span class="range-value" id="headerSize-val">18px</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Header Color</label>
+        <div class="color-row">
+          <input type="color" id="headerColor" value="#F0F0F0" oninput="updatePreview()">
+          <input type="text" id="headerColorHex" value="#F0F0F0" oninput="syncColor('header'); updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Username Text</div>
+      <div class="form-row">
+        <label>Font</label>
+        <select id="nameFont" onchange="updatePreview()">
+          <option value="Orbitron">Orbitron</option>
+          <option value="Rajdhani">Rajdhani</option>
+          <option value="Bebas Neue">Bebas Neue</option>
+          <option value="Russo One">Russo One</option>
+          <option value="Anton">Anton</option>
+          <option value="Montserrat">Montserrat</option>
+          <option value="Teko">Teko</option>
+          <option value="Oswald">Oswald</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Size</label>
+        <div class="range-row">
+          <input type="range" id="nameSize" min="18" max="60" value="30" oninput="updatePreview()">
+          <span class="range-value" id="nameSize-val">30px</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Color</label>
+        <div class="color-row">
+          <input type="color" id="nameColor" value="#FFFFFF" oninput="updatePreview()">
+          <input type="text" id="nameColorHex" value="#FFFFFF" oninput="syncColor('name'); updatePreview()">
+        </div>
+      </div>
+      <div class="switch-row">
+        <label style="margin:0;">Glow Effect</label>
+        <div class="switch on" id="sw-nameGlow" onclick="toggleSwitch('nameGlow')"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Amount / Main Text</div>
+      <div class="form-row">
+        <label>Font</label>
+        <select id="amountFont" onchange="updatePreview()">
+          <option value="Orbitron">Orbitron</option>
+          <option value="Rajdhani">Rajdhani</option>
+          <option value="Bebas Neue">Bebas Neue</option>
+          <option value="Russo One">Russo One</option>
+          <option value="Anton">Anton</option>
+          <option value="Montserrat">Montserrat</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Size</label>
+        <div class="range-row">
+          <input type="range" id="amountSize" min="24" max="80" value="44" oninput="updatePreview()">
+          <span class="range-value" id="amountSize-val">44px</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Color</label>
+        <div class="color-row">
+          <input type="color" id="amountColor" value="#E8001D" oninput="updatePreview()">
+          <input type="text" id="amountColorHex" value="#E8001D" oninput="syncColor('amount'); updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Action Text</div>
+      <div class="form-row">
+        <label>Text</label>
+        <input type="text" id="actionText" value="DROPPED A TIP" oninput="updatePreview()">
+      </div>
+      <div class="form-row">
+        <label>Font</label>
+        <select id="actionFont" onchange="updatePreview()">
+          <option value="Barlow Condensed">Barlow Condensed</option>
+          <option value="Rajdhani">Rajdhani</option>
+          <option value="Bebas Neue">Bebas Neue</option>
+          <option value="Oswald">Oswald</option>
+          <option value="Poppins">Poppins</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Size</label>
+        <div class="range-row">
+          <input type="range" id="actionSize" min="10" max="30" value="16" oninput="updatePreview()">
+          <span class="range-value" id="actionSize-val">16px</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Color</label>
+        <div class="color-row">
+          <input type="color" id="actionColor" value="#00A8FF" oninput="updatePreview()">
+          <input type="text" id="actionColorHex" value="#00A8FF" oninput="syncColor('action'); updatePreview()">
+        </div>
+      </div>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="section">
+      <div class="section-title">Layout & Effects</div>
+      <div class="form-row">
+        <label>Border Radius</label>
+        <div class="range-row">
+          <input type="range" id="radius" min="0" max="30" value="0" oninput="updatePreview()">
+          <span class="range-value" id="radius-val">0px</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Width</label>
+        <div class="range-row">
+          <input type="range" id="width" min="300" max="700" value="500" oninput="updatePreview()">
+          <span class="range-value" id="width-val">500px</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Border Size</label>
+        <div class="range-row">
+          <input type="range" id="borderSize" min="0" max="10" value="4" oninput="updatePreview()">
+          <span class="range-value" id="borderSize-val">4px</span>
+        </div>
+      </div>
+      <div class="switch-row">
+        <label style="margin:0;">Show Borders</label>
+        <div class="switch on" id="sw-showBorders" onclick="toggleSwitch('showBorders')"></div>
+      </div>
+      <div class="switch-row">
+        <label style="margin:0;">Show Corners</label>
+        <div class="switch on" id="sw-showCorners" onclick="toggleSwitch('showCorners')"></div>
+      </div>
+      <div class="switch-row">
+        <label style="margin:0;">Show Divider</label>
+        <div class="switch on" id="sw-showDivider" onclick="toggleSwitch('showDivider')"></div>
+      </div>
+    </div>
+
+    <!-- ANIMATIONS -->
+    <div class="section">
+      <div class="section-title">Animations</div>
+      <label>Entry Animation</label>
+      <div class="anim-grid">
+        <button class="anim-btn active" data-anim-in="slideRight" onclick="setAnim('in','slideRight')">Slide Right</button>
+        <button class="anim-btn" data-anim-in="slideLeft" onclick="setAnim('in','slideLeft')">Slide Left</button>
+        <button class="anim-btn" data-anim-in="slideUp" onclick="setAnim('in','slideUp')">Slide Up</button>
+        <button class="anim-btn" data-anim-in="slideDown" onclick="setAnim('in','slideDown')">Slide Down</button>
+        <button class="anim-btn" data-anim-in="zoomIn" onclick="setAnim('in','zoomIn')">Zoom In</button>
+        <button class="anim-btn" data-anim-in="flipIn" onclick="setAnim('in','flipIn')">Flip In</button>
+        <button class="anim-btn" data-anim-in="bounceIn" onclick="setAnim('in','bounceIn')">Bounce</button>
+      </div>
+
+      <label style="margin-top:15px;">Exit Animation</label>
+      <div class="anim-grid">
+        <button class="anim-btn active" data-anim-out="fadeOutLeft" onclick="setAnim('out','fadeOutLeft')">Fade Left</button>
+        <button class="anim-btn" data-anim-out="fadeOutRight" onclick="setAnim('out','fadeOutRight')">Fade Right</button>
+        <button class="anim-btn" data-anim-out="fadeOutDown" onclick="setAnim('out','fadeOutDown')">Fade Down</button>
+        <button class="anim-btn" data-anim-out="fadeOutUp" onclick="setAnim('out','fadeOutUp')">Fade Up</button>
+        <button class="anim-btn" data-anim-out="zoomOut" onclick="setAnim('out','zoomOut')">Zoom Out</button>
+      </div>
+
+      <div class="form-row" style="margin-top: 15px;">
+        <label>Display Duration (seconds)</label>
+        <div class="range-row">
+          <input type="range" id="duration" min="2" max="15" value="5" oninput="updatePreview()">
+          <span class="range-value" id="duration-val">5s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- POSITION (for OBS) -->
+    <div class="section">
+      <div class="section-title">Screen Position (OBS)</div>
+      <div class="position-grid">
+        <button class="pos-btn" data-pos="top-left" onclick="setPosition('top-left')" title="Top Left"></button>
+        <button class="pos-btn" data-pos="top-center" onclick="setPosition('top-center')" title="Top Center"></button>
+        <button class="pos-btn" data-pos="top-right" onclick="setPosition('top-right')" title="Top Right"></button>
+        <button class="pos-btn" data-pos="middle-left" onclick="setPosition('middle-left')"></button>
+        <button class="pos-btn active" data-pos="middle-center" onclick="setPosition('middle-center')"></button>
+        <button class="pos-btn" data-pos="middle-right" onclick="setPosition('middle-right')"></button>
+        <button class="pos-btn" data-pos="bottom-left" onclick="setPosition('bottom-left')"></button>
+        <button class="pos-btn" data-pos="bottom-center" onclick="setPosition('bottom-center')"></button>
+        <button class="pos-btn" data-pos="bottom-right" onclick="setPosition('bottom-right')"></button>
+      </div>
+    </div>
+
+    <!-- SOUND -->
+    <div class="section">
+      <div class="section-title">Alert Sound</div>
+      <div class="form-row">
+        <label>Upload Sound (MP3, WAV, OGG)</label>
+        <input type="file" accept="audio/*" id="soundFile" onchange="handleSoundUpload(event)">
+      </div>
+      <div class="form-row">
+        <label>Volume</label>
+        <div class="range-row">
+          <input type="range" id="volume" min="0" max="100" value="70">
+          <span class="range-value" id="volume-val">70%</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ===== GENERATE LINK MODAL ===== -->
+<div class="modal-overlay" id="linkModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="modal-title">🔗 Your OBS Alert Link</div>
+
+    <div class="step">
+      <span class="step-num">1</span>
+      <strong>Copy your unique overlay URL:</strong>
+    </div>
+
+    <div class="url-box" id="overlayUrl">Loading...</div>
+
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+      <button class="btn success" onclick="copyUrl()" style="flex:1;">📋 Copy Link</button>
+      <button class="btn secondary" onclick="openOverlay()" style="flex:1;">👁 Preview</button>
+    </div>
+
+    <div class="step">
+      <span class="step-num">2</span>
+      <strong>In OBS:</strong> Add <em>Browser Source</em> → paste URL
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <strong>Dimensions:</strong> Width <em>1920</em>, Height <em>1080</em>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <strong>Done!</strong> Alerts will fire automatically when someone tips/follows/subs on your channel.
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============== STATE ============== */
+const STREAMER_ID = 'kamalfps_' + Math.random().toString(36).substr(2, 9);
+let currentType = 'tip';
+let customSound = null;
+
+const defaults = {
+  tip: { headerText: 'INCOMING SUPPORT', actionText: 'DROPPED A TIP', primaryColor: '#E8001D', accentColor: '#00A8FF', amountColor: '#E8001D' },
+  follow: { headerText: 'NEW FOLLOWER', actionText: 'JOINED THE SQUAD', primaryColor: '#00A8FF', accentColor: '#E8001D', amountColor: '#00A8FF' },
+  sub: { headerText: 'SUBSCRIBED', actionText: 'LOCKED IN', primaryColor: '#ff00a8', accentColor: '#00A8FF', amountColor: '#ff00a8' },
+  raid: { headerText: 'INCOMING RAID', actionText: 'LED AN ARMY OF', primaryColor: '#ffaa00', accentColor: '#E8001D', amountColor: '#ffaa00' },
+  cheer: { headerText: 'CHEER RECEIVED', actionText: 'SENT BITS', primaryColor: '#9146FF', accentColor: '#00A8FF', amountColor: '#9146FF' }
+};
+
+const configs = {};
+Object.keys(defaults).forEach(t => configs[t] = getDefaultConfig(t));
+
+function getDefaultConfig(type) {
+  return {
+    // Colors
+    primaryColor: defaults[type].primaryColor,
+    accentColor: defaults[type].accentColor,
+    bgType: 'gradient',
+    bgColor1: '#0A0A0A',
+    bgColor2: '#1A1A1A',
+    bgOpacity: 95,
+
+    // Text
+    headerText: defaults[type].headerText,
+    headerFont: 'Barlow Condensed',
+    headerSize: 18,
+    headerColor: '#F0F0F0',
+
+    actionText: defaults[type].actionText,
+    actionFont: 'Barlow Condensed',
+    actionSize: 16,
+    actionColor: defaults[type].accentColor,
+
+    nameFont: 'Orbitron',
+    nameSize: 30,
+    nameColor: '#FFFFFF',
+    nameGlow: true,
+
+    amountFont: 'Orbitron',
+    amountSize: 44,
+    amountColor: defaults[type].amountColor,
+
+    // Layout
+    radius: 0,
+    width: 500,
+    borderSize: 4,
+    showBorders: true,
+    showCorners: true,
+    showDivider: true,
+
+    // Animation
+    animIn: 'slideRight',
+    animOut: 'fadeOutLeft',
+    duration: 5,
+
+    // Position
+    position: 'middle-center',
+
+    // Sound
+    soundUrl: null,
+    volume: 70
+  };
+}
+
+/* ============== SELECT ALERT TYPE ============== */
+function selectAlertType(type) {
+  currentType = type;
+  document.querySelectorAll('.alert-type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-type="${type}"]`).classList.add('active');
+  document.getElementById('current-type-label').textContent = `(${type.charAt(0).toUpperCase() + type.slice(1)} Alert)`;
+  loadConfigToUI(configs[type]);
+  updatePreview();
+}
+
+/* ============== LOAD CONFIG INTO UI ============== */
+function loadConfigToUI(cfg) {
+  Object.keys(cfg).forEach(key => {
+    const el = document.getElementById(key);
+    if (el) {
+      if (el.type === 'checkbox') el.checked = cfg[key];
+      else el.value = cfg[key];
+    }
+    const hex = document.getElementById(key + 'Hex');
+    if (hex) hex.value = cfg[key];
+    const valLabel = document.getElementById(key + '-val');
+    if (valLabel) valLabel.textContent = formatLabel(key, cfg[key]);
+  });
+
+  // Switches
+  ['nameGlow','showBorders','showCorners','showDivider'].forEach(k => {
+    const sw = document.getElementById('sw-' + k);
+    if (sw) sw.classList.toggle('on', cfg[k]);
+  });
+
+  // Animations
+  document.querySelectorAll('[data-anim-in]').forEach(b => b.classList.toggle('active', b.dataset.animIn === cfg.animIn));
+  document.querySelectorAll('[data-anim-out]').forEach(b => b.classList.toggle('active', b.dataset.animOut === cfg.animOut));
+
+  // Position
+  document.querySelectorAll('.pos-btn').forEach(b => b.classList.toggle('active', b.dataset.pos === cfg.position));
+}
+
+function formatLabel(key, val) {
+  if (key === 'bgOpacity' || key === 'volume') return val + '%';
+  if (key === 'duration') return val + 's';
+  if (key.includes('Size') || key === 'radius' || key === 'width' || key === 'borderSize') return val + 'px';
+  return val;
+}
+
+/* ============== UPDATE PREVIEW ============== */
+function updatePreview() {
+  // Sync UI back to config
+  const cfg = configs[currentType];
+  const fields = ['primaryColor','accentColor','bgType','bgColor1','bgColor2','bgOpacity','headerText','headerFont','headerSize','headerColor','actionText','actionFont','actionSize','actionColor','nameFont','nameSize','nameColor','amountFont','amountSize','amountColor','radius','width','borderSize','duration','volume'];
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) {
+      cfg[f] = el.type === 'number' || el.type === 'range' ? parseFloat(el.value) : el.value;
+      const label = document.getElementById(f + '-val');
+      if (label) label.textContent = formatLabel(f, cfg[f]);
+      const hex = document.getElementById(f + 'Hex');
+      if (hex) hex.value = cfg[f];
+    }
+  });
+
+  renderPreview();
+}
+
+function renderPreview() {
+  const cfg = configs[currentType];
+  document.getElementById('preview-size').textContent = cfg.width + 'px wide';
+
+  const bgColor1Rgb = hexToRgba(cfg.bgColor1, cfg.bgOpacity / 100);
+  const bgColor2Rgb = hexToRgba(cfg.bgColor2, cfg.bgOpacity / 100);
+
+  let bgGradient = bgColor1Rgb;
+  if (cfg.bgType === 'gradient') bgGradient = `linear-gradient(135deg, ${bgColor1Rgb} 0%, ${bgColor2Rgb} 100%)`;
+  if (cfg.bgType === 'transparent') bgGradient = 'transparent';
+
+  const nameShadow = cfg.nameGlow ? `0 0 10px ${cfg.primaryColor}, 0 0 20px ${cfg.primaryColor}80, 2px 2px 0 #0A0A0A` : '2px 2px 0 #0A0A0A';
+  const amountShadow = `0 0 20px ${cfg.amountColor}, 0 4px 0 #0A0A0A`;
+
+  // Build sample data
+  const sample = getSampleData(currentType);
+
+  const html = `
+    <div class="alert-container active" id="live-alert" style="
+      --primary-color: ${cfg.primaryColor};
+      --accent-color: ${cfg.accentColor};
+      --bg-gradient: ${bgGradient};
+      --header-font: '${cfg.headerFont}', sans-serif;
+      --header-size: ${cfg.headerSize}px;
+      --header-color: ${cfg.headerColor};
+      --name-font: '${cfg.nameFont}', sans-serif;
+      --name-size: ${cfg.nameSize}px;
+      --name-color: ${cfg.nameColor};
+      --name-shadow: ${nameShadow};
+      --action-font: '${cfg.actionFont}', sans-serif;
+      --action-size: ${cfg.actionSize}px;
+      --action-color: ${cfg.actionColor};
+      --amount-font: '${cfg.amountFont}', sans-serif;
+      --amount-size: ${cfg.amountSize}px;
+      --amount-color: ${cfg.amountColor};
+      --amount-shadow: ${amountShadow};
+      --msg-font: 'Rajdhani', sans-serif;
+      --msg-size: 15px;
+      --msg-color: #F0F0F0;
+      --radius: ${cfg.radius}px;
+      --border-size: ${cfg.borderSize}px;
+      --show-borders: ${cfg.showBorders ? 'block' : 'none'};
+      --show-corners: ${cfg.showCorners ? 'block' : 'none'};
+      --show-divider: ${cfg.showDivider ? 'block' : 'none'};
+      --anim-in: ${cfg.animIn};
+      --anim-out: ${cfg.animOut};
+      width: ${cfg.width}px;
+      animation-duration: 0.6s, 0.5s;
+      animation-delay: 0s, ${cfg.duration}s;
+    ">
+      <div class="alert-border-top"></div>
+      <div class="alert-main">
+        <div class="alert-corner top-left"></div>
+        <div class="alert-corner top-right"></div>
+        <div class="alert-corner bottom-left"></div>
+        <div class="alert-corner bottom-right"></div>
+        <div class="alert-header">
+          <span>◈</span>
+          <span>${escapeHtml(cfg.headerText)}</span>
+          <span>◈</span>
+        </div>
+        <div class="alert-divider"></div>
+        <div class="alert-body">
+          <div class="alert-username">${escapeHtml(sample.username)}</div>
+          <div class="alert-action">${escapeHtml(cfg.actionText)}</div>
+          <div class="alert-amount">${escapeHtml(sample.amount)}</div>
+        </div>
+        <div class="alert-message">"${escapeHtml(sample.message)}"</div>
+      </div>
+      <div class="alert-border-bottom"></div>
+    </div>
+  `;
+
+  document.getElementById('alert-preview').innerHTML = html;
+}
+
+function getSampleData(type) {
+  const data = {
+    tip: { username: 'ProPlayer_99', amount: '$25.00', message: 'Keep grinding! 🔥' },
+    follow: { username: 'NewFan_42', amount: '⚡', message: 'Welcome!' },
+    sub: { username: 'LoyalViewer', amount: '★', message: 'Tier 2 · 6 Months' },
+    raid: { username: 'BigStreamer', amount: '247', message: 'Drop the hammer!' },
+    cheer: { username: 'CheerFan', amount: '500', message: 'Bits for clips!' }
+  };
+  return data[type];
+}
+
+/* ============== HELPERS ============== */
+function syncColor(key) {
+  const map = { primary: 'primaryColor', accent: 'accentColor', header: 'headerColor', name: 'nameColor', action: 'actionColor', amount: 'amountColor' };
+  const field = map[key];
+  const hex = document.getElementById(field + 'Hex').value;
+  document.getElementById(field).value = hex;
+}
+
+function toggleSwitch(key) {
+  configs[currentType][key] = !configs[currentType][key];
+  document.getElementById('sw-' + key).classList.toggle('on', configs[currentType][key]);
+  renderPreview();
+}
+
+function setAnim(type, val) {
+  configs[currentType][type === 'in' ? 'animIn' : 'animOut'] = val;
+  document.querySelectorAll(`[data-anim-${type}]`).forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-anim-${type}="${val}"]`).classList.add('active');
+  renderPreview();
+}
+
+function setPosition(pos) {
+  configs[currentType].position = pos;
+  document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-pos="${pos}"]`).classList.add('active');
+}
+
+function hexToRgba(hex, alpha) {
+  hex = hex.replace('#', '');
+  const r = parseInt(hex.substring(0,2), 16);
+  const g = parseInt(hex.substring(2,4), 16);
+  const b = parseInt(hex.substring(4,6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function escapeHtml(t) { if (!t) return ''; return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+/* ============== TESTING ============== */
+function testAlert() {
+  renderPreview();
+  if (customSound) {
+    customSound.volume = (document.getElementById('volume').value) / 100;
+    customSound.currentTime = 0;
+    customSound.play().catch(()=>{});
+  } else {
+    playDefaultBeep();
+  }
+}
+
+function testRandom() {
+  const names = ['NightStrike','ShadowBlade','ApexHunter','GhostAim','CryoSniper','PhantomFPS'];
+  const name = names[Math.floor(Math.random()*names.length)];
+  // Not persisted — just visual
+  const el = document.querySelector('.alert-username');
+  if (el) el.textContent = name;
+}
+
+function playDefaultBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 1320].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, ctx.currentTime + i*0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i*0.1 + 0.2);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i*0.1);
+      osc.stop(ctx.currentTime + i*0.1 + 0.2);
+    });
+  } catch(e) {}
+}
+
+function handleSoundUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  customSound = new Audio(url);
+  // Store as base64 for link generation
+  const reader = new FileReader();
+  reader.onload = () => {
+    configs[currentType].soundUrl = reader.result;
+    toast('✓ Sound uploaded for ' + currentType, 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetDefaults() {
+  configs[currentType] = getDefaultConfig(currentType);
+  loadConfigToUI(configs[currentType]);
+  renderPreview();
+  toast('Reset to defaults', 'success');
+}
+
+/* ============== PRESETS ============== */
+const presets = {
+  neon: {
+    primaryColor: '#E8001D', accentColor: '#00A8FF',
+    bgColor1: '#0A0A0A', bgColor2: '#1A1A1A',
+    nameFont: 'Orbitron', amountFont: 'Orbitron', headerFont: 'Barlow Condensed',
+    nameGlow: true, radius: 0
+  },
+  minimal: {
+    primaryColor: '#333333', accentColor: '#666666',
+    bgColor1: '#FFFFFF', bgColor2: '#F5F5F5',
+    nameFont: 'Poppins', amountFont: 'Poppins', headerFont: 'Poppins',
+    headerColor: '#333333', nameColor: '#000000', amountColor: '#E8001D',
+    nameGlow: false, radius: 12, showCorners: false, showDivider: false
+  },
+  cyberpunk: {
+    primaryColor: '#ff00ff', accentColor: '#00ffff',
+    bgColor1: '#1a0033', bgColor2: '#000033',
+    nameFont: 'Orbitron', amountFont: 'Orbitron', headerFont: 'Orbitron',
+    nameGlow: true, radius: 0, amountColor: '#ff00ff'
+  },
+  retro: {
+    primaryColor: '#ff006e', accentColor: '#ffbe0b',
+    bgColor1: '#3a0ca3', bgColor2: '#7209b7',
+    nameFont: 'Russo One', amountFont: 'Bebas Neue', headerFont: 'Bebas Neue',
+    nameGlow: true, radius: 8, amountColor: '#ffbe0b'
+  },
+  nature: {
+    primaryColor: '#2d6a4f', accentColor: '#95d5b2',
+    bgColor1: '#081c15', bgColor2: '#1b4332',
+    nameFont: 'Montserrat', amountFont: 'Montserrat', headerFont: 'Montserrat',
+    nameGlow: false, radius: 8, amountColor: '#95d5b2'
+  }
+};
+
+function applyPreset(name) {
+  const p = presets[name];
+  Object.assign(configs[currentType], p);
+  loadConfigToUI(configs[currentType]);
+  renderPreview();
+  toast('Applied preset: ' + name, 'success');
+}
+
+/* ============== SAVE/LOAD ============== */
+function saveConfig() {
+  localStorage.setItem('kamalfps_configs', JSON.stringify(configs));
+  toast('Configuration saved locally', 'success');
+}
+
+function loadConfig() {
+  const saved = localStorage.getItem('kamalfps_configs');
+  if (saved) {
+    Object.assign(configs, JSON.parse(saved));
+    loadConfigToUI(configs[currentType]);
+    renderPreview();
+    toast('Configuration loaded', 'success');
+  } else {
+    toast('No saved config found', 'error');
+  }
+}
+
+/* ============== GENERATE LINK ============== */
+function generateLink() {
+  const payload = {
+    sid: STREAMER_ID,
+    configs: configs,
+    v: '1.0'
+  };
+
+  // Encode to base64 URL-safe
+  const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
+  const baseUrl = window.location.origin + window.location.pathname.replace('dashboard.html', 'overlay.html');
+  const url = `${baseUrl}?c=${encoded}`;
+
+  document.getElementById('overlayUrl').textContent = url;
+  document.getElementById('linkModal').classList.add('show');
+}
+
+function copyUrl() {
+  const url = document.getElementById('overlayUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    toast('✓ Link copied to clipboard', 'success');
+  });
+}
+
+function openOverlay() {
+  const url = document.getElementById('overlayUrl').textContent;
+  window.open(url, '_blank');
+}
+
+function closeModal() {
+  document.getElementById('linkModal').classList.remove('show');
+}
+
+/* ============== TOAST ============== */
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(100%)';
+    el.style.transition = 'all 0.3s';
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
+
+/* ============== INIT ============== */
+loadConfigToUI(configs.tip);
+renderPreview();
+
+// Auto-restart preview animation every 8s
+setInterval(() => {
+  const el = document.getElementById('live-alert');
+  if (el) renderPreview();
+}, 8000);
+</script>
+
+</body>
+</html>
